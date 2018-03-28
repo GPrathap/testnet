@@ -13,12 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Trains a generator on CIFAR data."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-
 import tensorflow as tf
 
 from cifar import networks, data_provider_sattelite

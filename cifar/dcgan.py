@@ -13,9 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """DCGAN generator and discriminator from https://arxiv.org/abs/1511.06434."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from math import log
 
@@ -113,7 +110,7 @@ def discriminator(inputs,
 # TODO(joelshor): Use fused batch norm by default. Investigate why some GAN
 # setups need the gradient of gradient FusedBatchNormGrad.
 def generator(inputs,
-              depth=64,
+              depth=8,
               final_size=256,
               num_outputs=3,
               is_training=True,
