@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+import os
 import tensorflow as tf
 
 from cifar import networks, data_provider_sattelite
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 tfgan = tf.contrib.gan
 flags = tf.flags
 
