@@ -16,7 +16,7 @@ import os
 import tensorflow as tf
 
 # from cifar import networks, networkssate, data_provider_sattelite, data_provider
-from cifar import networkssate as networks, data_provider_sattelite, data_provider
+from cifar import networkssate as networks, data_provider_sattelite
 
 
 
