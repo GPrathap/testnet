@@ -78,6 +78,9 @@ def main(_):
         # images, one_hot_labels, _, _ = data_provider.provide_data(
         #     FLAGS.batch_size, FLAGS.dataset_dir)
 
+    config = tf.ConfigProto(allow_soft_placement=True)
+    sess = tf.Session(config=config)
+
     # Define the GANModel tuple.
     noise = tf.random_normal([FLAGS.batch_size, 64])
     if FLAGS.conditional:
@@ -128,6 +131,7 @@ def main(_):
          tf.as_string(tf.train.get_or_create_global_step())],
         name='status_message')
     if FLAGS.max_number_of_steps == 0: return
+
     tfgan.gan_train(
         train_ops,
         hooks=(
