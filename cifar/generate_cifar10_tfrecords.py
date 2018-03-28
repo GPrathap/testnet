@@ -27,6 +27,8 @@ import tarfile
 from six.moves import cPickle as pickle
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
+import numpy as np
+
 
 CIFAR_FILENAME = 'cifar-10-python.tar.gz'
 CIFAR_DOWNLOAD_URL = 'https://www.cs.toronto.edu/~kriz/' + CIFAR_FILENAME
@@ -71,6 +73,11 @@ def convert_to_tfrecord(input_files, output_file):
     for input_file in input_files:
       data_dict = read_pickle_from_file(input_file)
       data = data_dict['images']
+      data =  np.array(data)
+      data = data.reshape((len(data), 3, 256, 256))
+      # datalen = len(data)
+      # data = np.array(data)
+      # data = data.reshape(datalen, -1)
       labels = data_dict['labels']
       num_entries_in_batch = len(labels)
       for i in range(num_entries_in_batch):

@@ -111,7 +111,7 @@ def discriminator(inputs,
 # setups need the gradient of gradient FusedBatchNormGrad.
 def generator(inputs,
               depth=8,
-              final_size=32,
+              final_size=256,
               num_outputs=3,
               is_training=True,
               reuse=None,

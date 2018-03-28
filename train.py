@@ -15,7 +15,11 @@
 import os
 import tensorflow as tf
 
-from cifar import networks, data_provider_sattelite
+# from cifar import networks, networkssate, data_provider_sattelite, data_provider
+from cifar import networkssate as networks, data_provider_sattelite, data_provider
+
+
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 tfgan = tf.contrib.gan
 flags = tf.flags
@@ -52,7 +56,7 @@ flags.DEFINE_boolean(
     'If `True`, use sync replicas. Otherwise use async.')
 
 flags.DEFINE_integer(
-    'worker_replicas', 1,
+    'worker_replicas', 10,
     'The number of gradients to collect before updating params. Only used '
     'with sync replicas.')
 
@@ -73,10 +77,10 @@ def main(_):
     # the forward inference and back-propagation.
     with tf.name_scope('inputs'):
       with tf.device('/cpu:0'):
-          images, one_hot_labels, _, _ = data_provider_sattelite.provide_data(
-                FLAGS.batch_size, FLAGS.dataset_dir)
-            # images, one_hot_labels, _, _ = data_provider.provide_data(
-            #     FLAGS.batch_size, FLAGS.dataset_dir)
+           images, one_hot_labels, _, _ = data_provider_sattelite.provide_data(
+                 FLAGS.batch_size, FLAGS.dataset_dir)
+          # images, one_hot_labels, _, _ = data_provider.provide_data(
+          #        FLAGS.batch_size, FLAGS.dataset_dir)
 
     #config = tf.ConfigProto(allow_soft_placement=True)
     #sess = tf.Session(config=config)

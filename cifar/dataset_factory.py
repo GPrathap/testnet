@@ -14,9 +14,11 @@
 # ==============================================================================
 """A factory-pattern class which returns classification image/label pairs."""
 from cifar import satellite
+from cifar.datasets import cifar10
 
 datasets_map = {
-    'satellite': satellite
+    'satellite': satellite,
+    'cifar10': cifar10,
 }
 
 
