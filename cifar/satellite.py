@@ -31,7 +31,7 @@ slim = tf.contrib.slim
 
 _FILE_PATTERN = 'satellite_%s.tfrecord'
 
-SPLITS_TO_SIZES = {'train': 100, 'test': 10}
+SPLITS_TO_SIZES = {'train': 5000, 'test': 1000}
 
 _NUM_CLASSES = 21
 
