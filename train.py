@@ -72,7 +72,7 @@ def main(_):
     # Force all input processing onto CPU in order to reserve the GPU for
     # the forward inference and back-propagation.
     with tf.name_scope('inputs'):
-      with tf.device('/cpu:0'):
+      with tf.device('/gpu:0'):
         images, one_hot_labels, _, _ = data_provider_sattelite.provide_data(
             FLAGS.batch_size, FLAGS.dataset_dir)
         # images, one_hot_labels, _, _ = data_provider.provide_data(
