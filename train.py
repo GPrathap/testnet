@@ -24,7 +24,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 tfgan = tf.contrib.gan
 flags = tf.flags
 
-flags.DEFINE_integer('batch_size', 16, 'The number of images in each batch.')
+flags.DEFINE_integer('batch_size', 64, 'The number of images in each batch.')
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
@@ -33,7 +33,7 @@ flags.DEFINE_string('train_log_dir', '/data/satellite/train_log',
 
 flags.DEFINE_string('dataset_dir', '/data/satellite/', 'Location of data.')
 
-flags.DEFINE_integer('max_number_of_steps', 1000,
+flags.DEFINE_integer('max_number_of_steps', 10000000,
                      'The maximum number of gradient steps.')
 
 flags.DEFINE_integer(
@@ -86,7 +86,7 @@ def main(_):
     #sess = tf.Session(config=config)
 
     # Define the GANModel tuple.
-    noise = tf.random_normal([FLAGS.batch_size, 64])
+    noise = tf.random_normal([FLAGS.batch_size, 100])
     if FLAGS.conditional:
       generator_fn = networks.conditional_generator
       discriminator_fn = networks.conditional_discriminator
