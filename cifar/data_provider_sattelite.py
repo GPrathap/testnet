@@ -63,7 +63,7 @@ def provide_data(batch_size, dataset_dir, dataset_name='satellite',
   images, labels = tf.train.batch(
       [image, label],
       batch_size=batch_size,
-      num_threads=32,
+      num_threads=1,
       capacity=5 * batch_size)
 
   labels = tf.reshape(labels, [-1])

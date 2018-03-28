@@ -20,11 +20,11 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 tfgan = tf.contrib.gan
 flags = tf.flags
 
-flags.DEFINE_integer('batch_size', 32, 'The number of images in each batch.')
+flags.DEFINE_integer('batch_size', 16, 'The number of images in each batch.')
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('train_log_dir', '/data/satellite',
+flags.DEFINE_string('train_log_dir', '/data/satellite/train_log',
                     'Directory where to write event logs.')
 
 flags.DEFINE_string('dataset_dir', '/data/satellite/', 'Location of data.')
@@ -52,7 +52,7 @@ flags.DEFINE_boolean(
     'If `True`, use sync replicas. Otherwise use async.')
 
 flags.DEFINE_integer(
-    'worker_replicas', 10,
+    'worker_replicas', 1,
     'The number of gradients to collect before updating params. Only used '
     'with sync replicas.')
 

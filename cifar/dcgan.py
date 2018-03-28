@@ -38,7 +38,7 @@ def _validate_image_inputs(inputs):
 # TODO(joelshor): Use fused batch norm by default. Investigate why some GAN
 # setups need the gradient of gradient FusedBatchNormGrad.
 def discriminator(inputs,
-                  depth=8,
+                  depth=16,
                   is_training=True,
                   reuse=None,
                   scope='Discriminator',
@@ -110,7 +110,7 @@ def discriminator(inputs,
 # TODO(joelshor): Use fused batch norm by default. Investigate why some GAN
 # setups need the gradient of gradient FusedBatchNormGrad.
 def generator(inputs,
-              depth=8,
+              depth=16,
               final_size=256,
               num_outputs=3,
               is_training=True,

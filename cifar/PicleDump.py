@@ -20,7 +20,7 @@ def createFiles(path, classes):
     datalist["labels"] = []
     for filename in glob.iglob(path, recursive=True):
         image = cv.imread(filename)
-        image = np.array(image)
+        image = np.array(image, dtype=np.float64)
         currentClass = ""
         for cla in classes:
             if cla in filename:
@@ -39,13 +39,13 @@ classesList = ["agricultural",'airplane','baseballdiamond','beach','buildings','
               'storagetanks','tenniscourt']
 
 lb = preprocessing.LabelBinarizer()
-datapath = "/home/geesara/data/usdata/uc_train_256_data/**.jpg"
+datapath = "/home/runge/Downloads/data/uc_test_256/**.jpg"
 datalist = createFiles(datapath, classesList)
 
-with open("images1.pickle", 'wb') as f:
+with open("/data/satellite/satellite_train.pickle", 'wb') as f:
     pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-with open("images1.pickle", 'rb') as ff:
+with open("/data/satellite/satellite_train.pickle", 'rb') as ff:
     bb = pickle.load(ff)
 
 print(len(bb["images"]))
