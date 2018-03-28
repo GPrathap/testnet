@@ -21,7 +21,7 @@ tensorflow/models/research/slim/datasets/download_and_convert_cifar10.py
 import os
 import tensorflow as tf
 
-from datasets import dataset_utils
+from cifar.datasets import dataset_utils
 
 slim = tf.contrib.slim
 
