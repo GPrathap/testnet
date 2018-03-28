@@ -68,7 +68,7 @@ def main(_):
   if not tf.gfile.Exists(FLAGS.train_log_dir):
     tf.gfile.MakeDirs(FLAGS.train_log_dir)
 
-  with tf.device(tf.train.replica_device_setter(FLAGS.ps_tasks)):
+  #with tf.device(tf.train.replica_device_setter(FLAGS.ps_tasks)):
     # Force all input processing onto CPU in order to reserve the GPU for
     # the forward inference and back-propagation.
     with tf.name_scope('inputs'):
@@ -78,8 +78,8 @@ def main(_):
         # images, one_hot_labels, _, _ = data_provider.provide_data(
         #     FLAGS.batch_size, FLAGS.dataset_dir)
 
-    config = tf.ConfigProto(allow_soft_placement=True)
-    sess = tf.Session(config=config)
+    #config = tf.ConfigProto(allow_soft_placement=True)
+    #sess = tf.Session(config=config)
 
     # Define the GANModel tuple.
     noise = tf.random_normal([FLAGS.batch_size, 64])
