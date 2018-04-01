@@ -14,6 +14,7 @@
 # ==============================================================================
 import os
 import tensorflow as tf
+import numpy as np
 
 # from cifar import networks, networkssate, data_provider_sattelite, data_provider
 from cifar import networkssate as networks, data_provider_sattelite
@@ -21,6 +22,7 @@ from cifar import networkssate as networks, data_provider_sattelite
 
 
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+from grid_layout import create_mine_grid
 
 tfgan = tf.contrib.gan
 flags = tf.flags
@@ -87,7 +89,10 @@ def main(_):
     #sess = tf.Session(config=config)
 
     # Define the GANModel tuple.
-    noise = tf.random_normal([FLAGS.batch_size, 100])
+    #noise = tf.random_normal([FLAGS.batch_size, 100])
+    noise1 = create_mine_grid(1, 100, FLAGS.batch_size, 99, None, True, True)
+    noise = np.transpose(noise1)
+    noise = np.array(noise, dtype=np.float32)
     if FLAGS.conditional:
       generator_fn = networks.conditional_generator
       discriminator_fn = networks.conditional_discriminator
