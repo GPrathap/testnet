@@ -34,7 +34,7 @@ flags.DEFINE_string('eval_dir', '/data/satellitegpu/result',
 
 flags.DEFINE_string('dataset_dir', "/data/satellitegpu/", 'Location of data.')
 
-flags.DEFINE_integer('num_images_generated', 100,
+flags.DEFINE_integer('num_images_generated', 210,
                      'Number of images to generate at once.')
 
 flags.DEFINE_integer('num_inception_images', 10,
@@ -103,9 +103,9 @@ def main(_, run_eval_loop=True):
         '%s/%s'% (FLAGS.eval_dir, 'conditional_cifar10.png'),
         tf.image.encode_png(uint8_images[0]))
   else:
-    if FLAGS.num_images_generated >= 100 and FLAGS.write_to_disk:
+    if FLAGS.num_images_generated >= 210 and FLAGS.write_to_disk:
       reshaped_imgs = tfgan.eval.image_reshaper(
-          generated_data[:100], num_cols=FLAGS.num_images_per_class)
+          generated_data[:210], num_cols=FLAGS.num_images_per_class)
       uint8_images = data_provider.float_image_to_uint8(reshaped_imgs)
       image_write_ops = tf.write_file(
           '%s/%s'% (FLAGS.eval_dir, 'unconditional_cifar10.png'),

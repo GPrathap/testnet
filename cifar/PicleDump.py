@@ -41,14 +41,20 @@ classesList = ["agricultural",'airplane','baseballdiamond','beach','buildings','
               'mobilehomepark','overpass','parkinglot','river','runway','sparseresidential',
               'storagetanks','tenniscourt']
 
-# lb = preprocessing.LabelBinarizer()
-# datapath = "/home/geesara/Downloads/data/uc_train_256_data/**.jpg"
-# datalist = createFiles(datapath, classesList)
-#
-# with open("/data/satellite/satellite_train.pickle", 'wb') as f:
-#     pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-download_and_convert_satellite.run("/data/satellite/")
-
+train = False
+if train:
+    lb = preprocessing.LabelBinarizer()
+    datapath = "/home/runge/Downloads/data/uc_train_256_data/**.jpg"
+    datalist = createFiles(datapath, classesList)
+    with open("/data/satellitegpu/satellite_train.pickle", 'wb') as f:
+         pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)
+    download_and_convert_satellite.run("/data/satellitegpu/")
+else:
+    lb = preprocessing.LabelBinarizer()
+    datapath = "/home/runge/Downloads/data/uc_test_256/**.jpg"
+    datalist = createFiles(datapath, classesList)
+    with open("/data/satellitegpu/satellite_test.pickle", 'wb') as f:
+        pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)
+    download_and_convert_satellite.run("/data/satellitegpu/", train=False)
 

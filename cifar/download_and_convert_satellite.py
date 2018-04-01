@@ -149,7 +149,7 @@ def _clean_up_temporary_files(dataset_dir):
   # tf.gfile.DeleteRecursively(tmp_dir)
 
 
-def run(dataset_dir):
+def run(dataset_dir, train=True):
   """Runs the download and conversion operation.
 
   Args:
@@ -158,26 +158,32 @@ def run(dataset_dir):
   if not tf.gfile.Exists(dataset_dir):
     tf.gfile.MakeDirs(dataset_dir)
 
-  training_filename = _get_output_filename(dataset_dir, 'train')
-  # testing_filename = _get_output_filename(dataset_dir, 'test')
-  #
-  # if tf.gfile.Exists(training_filename) and tf.gfile.Exists(testing_filename):
-  #   print('Dataset files already exist. Exiting without re-creating them.')
-  #   return
-  #
-  # dataset_utils.download_and_uncompress_tarball(_DATA_URL, dataset_dir)
+  if train==True:
+    training_filename = _get_output_filename(dataset_dir, 'train')
+    with tf.python_io.TFRecordWriter(training_filename) as tfrecord_writer:
+      offset = 0
+      for i in range(_NUM_TRAIN_FILES):
+        filename = "/data/satellitegpu/satellite_train.pickle"
+        offset = _add_to_tfrecord(filename, tfrecord_writer, offset)
+      # Finally, write the labels file:
+      labels_to_class_names = dict(zip(range(len(_CLASS_NAMES)), _CLASS_NAMES))
+      dataset_utils.write_label_file(labels_to_class_names, dataset_dir)
 
-  # First, process the training data:
-  with tf.python_io.TFRecordWriter(training_filename) as tfrecord_writer:
-    offset = 0
-    for i in range(_NUM_TRAIN_FILES):
-      filename = "/data/satellite/satellite_train.pickle"
-      offset = _add_to_tfrecord(filename, tfrecord_writer, offset)
+      _clean_up_temporary_files(dataset_dir)
+      print('\nFinished converting the Cifar10 dataset!')
+
+  else:
+    testing_filename = _get_output_filename(dataset_dir, 'test')
+    with tf.python_io.TFRecordWriter(testing_filename) as tfrecord_writer:
+      filename = "/data/satellitegpu/satellite_test.pickle"
+      _add_to_tfrecord(filename, tfrecord_writer)
+
+    # Finally, write the labels file:
+    labels_to_class_names = dict(zip(range(len(_CLASS_NAMES)), _CLASS_NAMES))
+    dataset_utils.write_label_file(labels_to_class_names, dataset_dir)
+
+    _clean_up_temporary_files(dataset_dir)
+    print('\nFinished converting the Cifar10 dataset!')
 
 
-  # Finally, write the labels file:
-  labels_to_class_names = dict(zip(range(len(_CLASS_NAMES)), _CLASS_NAMES))
-  dataset_utils.write_label_file(labels_to_class_names, dataset_dir)
 
-  _clean_up_temporary_files(dataset_dir)
-  print('\nFinished converting the Cifar10 dataset!')
