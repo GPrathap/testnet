@@ -20,7 +20,8 @@ from cifar import networkssate as networks, data_provider_sattelite
 
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 tfgan = tf.contrib.gan
 flags = tf.flags
 
@@ -28,12 +29,12 @@ flags.DEFINE_integer('batch_size', 64, 'The number of images in each batch.')
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('train_log_dir', '/data/satellite/train_log',
+flags.DEFINE_string('train_log_dir', '/data/satellitegpu/train_log',
                     'Directory where to write event logs.')
 
-flags.DEFINE_string('dataset_dir', '/data/satellite/', 'Location of data.')
+flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
 
-flags.DEFINE_integer('max_number_of_steps', 10000000,
+flags.DEFINE_integer('max_number_of_steps', 100000,
                      'The maximum number of gradient steps.')
 
 flags.DEFINE_integer(

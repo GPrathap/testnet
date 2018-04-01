@@ -14,15 +14,10 @@
 # ==============================================================================
 """Evaluates a TFGAN trained CIFAR model."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import tensorflow as tf
 
-import data_provider
-import networks
-import util
+from cifar import networkssate as networks, data_provider_sattelite as data_provider
+from cifar import util
 
 
 flags = tf.flags
@@ -31,13 +26,13 @@ tfgan = tf.contrib.gan
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('checkpoint_dir', '/tmp/cifar10/',
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log',
                     'Directory where the model was written to.')
 
-flags.DEFINE_string('eval_dir', '/tmp/cifar10/',
+flags.DEFINE_string('eval_dir', '/data/satellitegpu/result',
                     'Directory where the results are saved to.')
 
-flags.DEFINE_string('dataset_dir', None, 'Location of data.')
+flags.DEFINE_string('dataset_dir', "/data/satellitegpu/", 'Location of data.')
 
 flags.DEFINE_integer('num_images_generated', 100,
                      'Number of images to generate at once.')
@@ -48,7 +43,7 @@ flags.DEFINE_integer('num_inception_images', 10,
 flags.DEFINE_boolean('eval_real_images', False,
                      'If `True`, run Inception network on real images.')
 
-flags.DEFINE_boolean('conditional_eval', False,
+flags.DEFINE_boolean('conditional_eval', True,
                      'If `True`, set up a conditional GAN.')
 
 flags.DEFINE_boolean('eval_frechet_inception_distance', True,
@@ -136,7 +131,7 @@ def _get_real_data(num_images_generated, dataset_dir):
 
 def _get_generated_data(num_images_generated, conditional_eval, num_classes):
   """Get generated images."""
-  noise = tf.random_normal([num_images_generated, 64])
+  noise = tf.random_normal([num_images_generated, 100])
   # If conditional, generate class-specific images.
   if conditional_eval:
     conditioning = util.get_generator_conditioning(
