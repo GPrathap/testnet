@@ -1,17 +1,4 @@
-# Copyright 2017 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
+
 import os
 import tensorflow as tf
 import numpy as np
@@ -166,8 +153,11 @@ def _learning_rate():
 
 def _optimizer(gen_lr, dis_lr, use_sync_replicas):
   """Get an optimizer, that's optionally synchronous."""
-  generator_opt = tf.train.RMSPropOptimizer(gen_lr, decay=.9, momentum=0.1)
-  discriminator_opt = tf.train.RMSPropOptimizer(dis_lr, decay=.95, momentum=0.1)
+  #generator_opt = tf.train.RMSPropOptimizer(gen_lr, decay=.9, momentum=0.1)
+  #discriminator_opt = tf.train.RMSPropOptimizer(dis_lr, decay=.95, momentum=0.1)
+  kwargs = {'beta1': 0.5, 'beta2': 0.999}
+  generator_opt = tf.train.AdamOptimizer(gen_lr, beta1=0.5, beta2=0.999)
+  discriminator_opt = tf.train.AdamOptimizer(dis_lr, beta1=0.5, beta2=0.999)
 
   def _make_sync(opt):
     return tf.train.SyncReplicasOptimizer(
