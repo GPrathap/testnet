@@ -31,7 +31,7 @@ flags.DEFINE_integer('batch_size', 64, 'The number of images in each batch.')
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('train_log_dir', '/data/satellitegpu/train_log1',
+flags.DEFINE_string('train_log_dir', '/data/satellitegpu/train_log2',
                     'Directory where to write event logs.')
 
 flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
