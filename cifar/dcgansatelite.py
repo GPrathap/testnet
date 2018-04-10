@@ -133,7 +133,7 @@ def discriminator(inputs,
 
         feature = tf.concat(values = [global_max1, global_max2, global_max3], axis=1, name='d/concat_layer1')
         scope="conv6"
-        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//16), activation_fn=tf.identity,
+        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//64), activation_fn=tf.identity,
                     normalizer_fn=None, scope='fully_connected_layer1')
         end_points[scope] = net_h6
 
