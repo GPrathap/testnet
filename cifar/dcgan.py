@@ -83,9 +83,7 @@ def discriminator(inputs,
   end_points = {}
   with tf.variable_scope(scope, values=[inputs], reuse=reuse) as scope:
     with slim.arg_scope([normalizer_fn], **normalizer_fn_args):
-      with slim.arg_scope([slim.conv2d],
-                          stride=2,
-                          kernel_size=4,
+      with slim.arg_scope([slim.conv2d],stride=2,kernel_size=4,
                           activation_fn=tf.nn.leaky_relu):
         net = inputs
         maxpooling = ""

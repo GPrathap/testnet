@@ -85,7 +85,7 @@ def discriminator(img, unused_conditioning, is_training=True):
     images are real. The output can lie in [-inf, inf], with positive values
     indicating high confidence that the images are real.
   """
-  logits, _ = dcgan.discriminator(img, is_training=is_training)
+  logits, _, _, _ = dcgan.discriminator(img, is_training=is_training)
   return logits
 
 
@@ -109,7 +109,7 @@ def conditional_discriminator(img, conditioning, is_training=True):
     images are real. The output can lie in [-inf, inf], with positive values
     indicating high confidence that the images are real.
   """
-  logits, end_points = dcgan.discriminator(img, is_training=is_training)
+  logits, end_points, _, _ = dcgan.discriminator(img, is_training=is_training)
 
   # Condition the last convolution layer.
   _, one_hot_labels = conditioning

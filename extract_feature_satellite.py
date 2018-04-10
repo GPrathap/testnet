@@ -53,7 +53,8 @@ def main(_):
 
 
     # with tf.device("/gpu:0"): # <-- if you have a GPU machine
-    real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size, FLAGS.c_dim], name='real_images')
+    real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size,
+                                               FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
     net_d, d_logits, features = discriminator_simplified_api(real_images, is_train=FLAGS.is_train, reuse=False)

@@ -98,76 +98,55 @@ def discriminator(inputs,
                           kernel_size=4,
                           activation_fn=tf.nn.leaky_relu):
         net = inputs
-        net_in = InputLayer(inputs, name='d/in')
-        net_h0 = Conv2d(net_in, df_dim, (k, k), (2, 2), act=lambda x: tl.act.lrelu(x, 0.2),
-                        padding='SAME', W_init=w_init, name='d/h0/conv2d')
-        end_points["conv0"] = net_h0
 
-        net_h1 = Conv2d(net_h0, df_dim * 2, (k, k), (2, 2), act=None,
-                        padding='SAME', W_init=w_init, name='d/h1/conv2d')
-        net_h1 = BatchNormLayer(net_h1, act=lambda x: tl.act.lrelu(x, 0.2),
-                                is_train=is_training, gamma_init=gamma_init, name='d/h1/batch_norm')
-        end_points["conv1"] = net_h1
+        scope = 'conv0'
+        net_h0 = slim.convolution2d(net, df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h0
 
-        net_h2 = Conv2d(net_h1, df_dim * 4, (k, k), (2, 2), act=None,
-                        padding='SAME', W_init=w_init, name='d/h2/conv2d')
-        net_h2 = BatchNormLayer(net_h2, act=lambda x: tl.act.lrelu(x, 0.2),
-                                is_train=is_training, gamma_init=gamma_init, name='d/h2/batch_norm')
-        end_points["conv2"] = net_h2
+        scope = 'conv1'
+        net_h1 = slim.convolution2d(net_h0, 2*df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h1
 
-        net_h3 = Conv2d(net_h2, df_dim * 8, (k, k), (2, 2), act=None,
-                        padding='SAME', W_init=w_init, name='d/h3/conv2d')
-        net_h3 = BatchNormLayer(net_h3, act=lambda x: tl.act.lrelu(x, 0.2),
-                                is_train=is_training, gamma_init=gamma_init, name='d/h3/batch_norm')
-        end_points["conv3"] = net_h3
+        scope = 'conv2'
+        net_h2 = slim.convolution2d(net_h1, 4 * df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h2
 
-        global_max1 = MaxPool2d(net_h3, filter_size=(4, 4), strides=(1,1), padding='SAME', name='maxpool1')
-        global_max1 = FlattenLayer(global_max1, name='d/h3/flatten')
+        scope = 'conv3'
+        net_h3 = slim.convolution2d(net_h2, 8 * df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h3
 
-        net_h4 = Conv2d(net_h3, df_dim * 16, (k, k), (2, 2), act=None,
-                        padding='SAME', W_init=w_init, name='d/h4/conv2d')
-        net_h4 = BatchNormLayer(net_h4, act=lambda x: tl.act.lrelu(x, 0.2),
-                                is_train=is_training, gamma_init=gamma_init, name='d/h4/batch_norm')
-        end_points["conv4"] = net_h4
+        global_max1 = slim.max_pool2d(net_h3, kernel_size=(4, 4), stride=1, padding='SAME', scope='maxpool1')
+        global_max1 = slim.flatten(global_max1, scope='flatten1')
 
-        global_max2 = MaxPool2d(net_h4, filter_size=(2, 2), strides=(1,1), padding='SAME', name='maxpool2')
-        global_max2 = FlattenLayer(global_max2, name='d/h4/flatten')
+        scope = 'conv4'
+        net_h4 = slim.convolution2d(net_h3, 16 * df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h4
 
-        net_h5 = Conv2d(net_h4, df_dim * 32, (k, k), (2, 2), act=None,
-                        padding='SAME', W_init=w_init, name='d/h5/conv2d')
-        net_h5 = BatchNormLayer(net_h5, act=lambda x: tl.act.lrelu(x, 0.2),
-                                is_train=is_training, gamma_init=gamma_init, name='d/h5/batch_norm')
-        end_points["conv5"] = net_h5
+        global_max2 = slim.max_pool2d(net_h4, kernel_size=(2, 2), stride=1, padding='SAME', scope='maxpool2')
+        global_max2 = slim.flatten(global_max2, scope='flatten2')
 
-        global_max3 = FlattenLayer(net_h5, name='d/h5/flatten')
+        scope = 'conv5'
+        net_h5 = slim.convolution2d(net_h4, 16 * df_dim, normalizer_fn=normalizer_fn, scope=scope)
+        end_points[scope] = net_h5
 
-        feature = ConcatLayer(layers=[global_max1, global_max2, global_max3], name='d/concat_layer1')
-        net_h6 = DenseLayer(feature, n_units=1, act=tf.identity,
-                            W_init=w_init, name='d/h6/lin_sigmoid')
-        end_points["conv6"] = net_h6
-        logits = net_h6.outputs
-        net_h6.outputs = tf.nn.sigmoid(net_h6.outputs)
+        global_max3 =slim.flatten(net_h5, scope='flatten3')
+
+        feature = tf.concat(values = [global_max1, global_max2, global_max3], axis=1, name='d/concat_layer1')
+        scope="conv6"
+        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//16), activation_fn=tf.identity,
+                    normalizer_fn=None, scope='fully_connected_layer1')
+        end_points[scope] = net_h6
+
+        scope = "conv7"
+        net_h7 = slim.fully_connected(net_h6, num_outputs=1, activation_fn=tf.identity,
+                                      normalizer_fn=None, scope='fully_connected_layer2')
+        end_points[scope] = net_h7
+
+        logits = net_h7
+        net_h7.outputs = tf.nn.sigmoid(net_h7)
         end_points['logits'] = logits
 
-        '''
-        for i in xrange(int(log(inp_shape, 2))):
-          scope = 'conv%i' % (i + 1)
-          current_depth = depth * 2**i
-          normalizer_fn_ = None if i == 0 else normalizer_fn
-          net = slim.conv2d(
-              net, current_depth, normalizer_fn=normalizer_fn_, stride=2, scope=scope)
-          if("conv1" == scope):
-            maxpooling = layers.max_pooling2d(net, pool_size=[4,4], strides=2)
-          end_points[scope] = net
-
-        logits = slim.conv2d(net, 1, kernel_size=1, stride=1, padding='VALID',
-                             normalizer_fn=None, activation_fn=None)
-        logits = tf.reshape(logits, [-1, 1])
- 
-        '''
-
-
-        return logits, end_points
+        return logits, end_points, feature, net_h7
 
 
 # TODO(joelshor): Use fused batch norm by default. Investigate why some GAN

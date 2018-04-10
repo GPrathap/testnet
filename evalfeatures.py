@@ -13,11 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """Evaluates a TFGAN trained CIFAR model."""
-
+import os
 import tensorflow as tf
 
 from Utils import get_init_vector
-from cifar import networkssate as networks, data_provider_sattelite as data_provider
+from cifar import networkssate as networks, data_provider_sattelite as data_provider, data_provider_sattelite
+from cifar import dcgansatelite as dcgan
 from cifar import util
 
 
@@ -27,10 +28,7 @@ tfgan = tf.contrib.gan
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log5',
-                    'Directory where the model was written to.')
-
-flags.DEFINE_string('eval_dir', '/data/satellitegpu/result5',
+flags.DEFINE_string('eval_dir', '/data/satellitegpu/result',
                     'Directory where the results are saved to.')
 
 flags.DEFINE_string('dataset_dir', "/data/satellitegpu/", 'Location of data.')
@@ -41,7 +39,7 @@ flags.DEFINE_integer('num_images_generated', 210,
 flags.DEFINE_integer('num_inception_images', 10,
                      'The number of images to run through Inception at once.')
 
-flags.DEFINE_boolean('eval_real_images', True,
+flags.DEFINE_boolean('eval_real_images', False,
                      'If `True`, run Inception network on real images.')
 
 flags.DEFINE_boolean('conditional_eval', True,
@@ -62,67 +60,43 @@ flags.DEFINE_integer('max_number_of_evaluations', None,
 flags.DEFINE_integer('batch_size', 64, 'The number of images in each batch.')
 flags.DEFINE_boolean('write_to_disk', True, 'If `True`, run images to disk.')
 flags.DEFINE_integer('generator_init_vector_size', 100, 'Generator initialization vector size')
+flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
+flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log4',
+                    'Directory where the model was written to.')
 
+
+INPUT_TENSOR = 'g/in:0'
+OUTPUT_TENSOR = 'logits:0'
+MODEL_GRAPH_DEF = "/data/satellitegpu/train_log4/graph.pbtxt"
+
+def geoxt_score(images, graph_def_filename=None, input_tensor=INPUT_TENSOR,
+                output_tensor=OUTPUT_TENSOR, num_batches=1):
+
+  images.shape.assert_is_compatible_with([None, 256, 256, 3])
+
+  graph_def = _graph_def_from_par_or_disk(graph_def_filename)
+  mnist_classifier_fn = lambda x: tfgan.eval.run_image_classifier(  # pylint: disable=g-long-lambda
+      x, graph_def, input_tensor, output_tensor)
+
+  score = tfgan.eval.classifier_score(
+      images, mnist_classifier_fn, num_batches)
+  score.shape.assert_is_compatible_with([])
+
+  return score
+
+def _graph_def_from_par_or_disk(filename):
+  if filename is None:
+    return tfgan.eval.get_graph_def_from_resource(MODEL_GRAPH_DEF)
+  else:
+    return tfgan.eval.get_graph_def_from_disk(MODEL_GRAPH_DEF)
 
 def main(_, run_eval_loop=True):
   # Fetch and generate images to run through Inception.
   with tf.name_scope('inputs'):
-    real_data, num_classes = _get_real_data(
-        FLAGS.num_images_generated, FLAGS.dataset_dir)
-    generated_data = _get_generated_data(
-        FLAGS.num_images_generated, FLAGS.conditional_eval, num_classes)
+      real_images, one_hot_labels, _, num_classes = data_provider_sattelite.provide_data(
+        FLAGS.batch_size, FLAGS.dataset_dir)
 
-  # Compute Frechet Inception Distance.
-  if FLAGS.eval_frechet_inception_distance:
-    fid = util.get_frechet_inception_distance(
-        real_data, generated_data, FLAGS.num_images_generated,
-        FLAGS.num_inception_images)
-    tf.summary.scalar('frechet_inception_distance', fid)
-
-  # Compute normal Inception scores.
-  if FLAGS.eval_real_images:
-    inc_score = util.get_inception_scores(
-        real_data, FLAGS.num_images_generated, FLAGS.num_inception_images)
-  else:
-    inc_score = util.get_inception_scores(
-        generated_data, FLAGS.num_images_generated, FLAGS.num_inception_images)
-  tf.summary.scalar('inception_score', inc_score)
-
-  # If conditional, display an image grid of difference classes.
-  if FLAGS.conditional_eval and not FLAGS.eval_real_images:
-    reshaped_imgs = util.get_image_grid(
-        generated_data, FLAGS.num_images_generated, num_classes,
-        FLAGS.num_images_per_class)
-    tf.summary.image('generated_data', reshaped_imgs, max_outputs=1)
-
-  # Create ops that write images to disk.
-  image_write_ops = None
-  if FLAGS.conditional_eval and FLAGS.write_to_disk:
-    reshaped_imgs = util.get_image_grid(
-        generated_data, FLAGS.num_images_generated, num_classes,
-        FLAGS.num_images_per_class)
-    uint8_images = data_provider.float_image_to_uint8(reshaped_imgs)
-    image_write_ops = tf.write_file(
-        '%s/%s'% (FLAGS.eval_dir, 'conditional_cifar10.png'),
-        tf.image.encode_png(uint8_images[0]))
-  else:
-    if FLAGS.num_images_generated >= 210 and FLAGS.write_to_disk:
-      reshaped_imgs = tfgan.eval.image_reshaper(
-          generated_data[:210], num_cols=FLAGS.num_images_per_class)
-      uint8_images = data_provider.float_image_to_uint8(reshaped_imgs)
-      image_write_ops = tf.write_file(
-          '%s/%s'% (FLAGS.eval_dir, 'unconditional_cifar10.png'),
-          tf.image.encode_png(uint8_images[0]))
-
-  # For unit testing, use `run_eval_loop=False`.
-  if not run_eval_loop: return
-  tf.contrib.training.evaluate_repeatedly(
-      FLAGS.checkpoint_dir,
-      master=FLAGS.master,
-      hooks=[tf.contrib.training.SummaryAtEndHook(FLAGS.eval_dir),
-             tf.contrib.training.StopAfterNEvalsHook(1)],
-      eval_ops=image_write_ops,
-      max_number_of_evaluations=FLAGS.max_number_of_evaluations)
 
 
 def _get_real_data(num_images_generated, dataset_dir):
@@ -134,7 +108,7 @@ def _get_real_data(num_images_generated, dataset_dir):
 
 def _get_generated_data(num_images_generated, conditional_eval, num_classes):
   """Get generated images."""
-  noise = tf.random_normal([num_images_generated, 100])
+  noise = get_init_vector(FLAGS.generator_init_vector_size, FLAGS.batch_size)
   # If conditional, generate class-specific images.
   if conditional_eval:
     conditioning = util.get_generator_conditioning(
