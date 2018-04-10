@@ -163,9 +163,6 @@ def _optimizer(gen_lr, dis_lr, use_sync_replicas):
     return generator_opt, discriminator_opt
 
 
-
-
-
 if __name__ == '__main__':
     tf.logging.set_verbosity(tf.logging.INFO)
     tf.app.run()
