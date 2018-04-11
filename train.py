@@ -119,6 +119,9 @@ def main(_):
             name='status_message')
         if FLAGS.max_number_of_steps == 0: return
 
+        opts = tf.GPUOptions(per_process_gpu_memory_fraction=0.666)
+        conf = tf.ConfigProto(gpu_options=opts)
+
         tfgan.gan_train(
             train_ops,
             hooks=(
@@ -127,7 +130,9 @@ def main(_):
                     sync_hooks),
             logdir=FLAGS.train_log_dir,
             master=FLAGS.master,
-            is_chief=FLAGS.task == 0)
+            is_chief=FLAGS.task == 0,
+            config=conf
+        )
 
 
 
