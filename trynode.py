@@ -14,8 +14,9 @@ from tensorflow.python.framework.graph_util import convert_variables_to_constant
 
 
 def load_graph():
-    #checkpoint_path = tf.train.latest_checkpoint("/data/satellitegpu/train_log4/")
-    #saver = tf.train.import_meta_graph(checkpoint_path + ".meta", import_scope=None)
+
+    checkpoint_path = tf.train.latest_checkpoint("/data/satellitegpu/train_log5/")
+    saver = tf.train.import_meta_graph(checkpoint_path + ".meta")
     #saver = tf.train.import_meta_graph('/data/satellitegpu/train_log4/model.ckpt-98741.data-00000-of-00001')
     #new_saver.restore(sess, 'my-save-dir/my-model-10000')
     saver = tf.train.Saver()

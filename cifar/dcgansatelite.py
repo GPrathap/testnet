@@ -45,7 +45,7 @@ def _validate_image_inputs(inputs):
 def discriminator(inputs,
                   depth=8,
                   is_training=True,
-                  reuse=None,
+                  reuse=True,
                   scope='Discriminator',
                   fused_batch_norm=False):
   """Discriminator network for DCGAN.

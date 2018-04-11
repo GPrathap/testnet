@@ -15,12 +15,13 @@
 """Evaluates a TFGAN trained CIFAR model."""
 import os
 import tensorflow as tf
+from tensorflow.contrib.learn.python.learn.utils.inspect_checkpoint import print_tensors_in_checkpoint_file
 
 from Utils import get_init_vector
 from cifar import networkssate as networks, data_provider_sattelite as data_provider, data_provider_sattelite
 from cifar import dcgansatelite as dcgan
 from cifar import util
-
+from tensorflow.contrib import predictor, slim
 
 flags = tf.flags
 FLAGS = tf.flags.FLAGS
@@ -28,7 +29,7 @@ tfgan = tf.contrib.gan
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('eval_dir', '/data/satellitegpu/result',
+flags.DEFINE_string('eval_dir', '/data/satellitegpu/result1',
                     'Directory where the results are saved to.')
 
 flags.DEFINE_string('dataset_dir', "/data/satellitegpu/", 'Location of data.')
@@ -62,7 +63,7 @@ flags.DEFINE_boolean('write_to_disk', True, 'If `True`, run images to disk.')
 flags.DEFINE_integer('generator_init_vector_size', 100, 'Generator initialization vector size')
 flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log4',
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/testing_log5',
                     'Directory where the model was written to.')
 
 
@@ -92,11 +93,58 @@ def _graph_def_from_par_or_disk(filename):
     return tfgan.eval.get_graph_def_from_disk(MODEL_GRAPH_DEF)
 
 def main(_, run_eval_loop=True):
-  # Fetch and generate images to run through Inception.
-  with tf.name_scope('inputs'):
+  tf.reset_default_graph()
+  with tf.name_scope('inputs1'):
       real_images, one_hot_labels, _, num_classes = data_provider_sattelite.provide_data(
         FLAGS.batch_size, FLAGS.dataset_dir)
 
+
+      logits, end_points_des, feature, net_h7 = dcgan.discriminator(real_images)
+
+      #variables_to_restore = slim.get_model_variables()
+      #restorer = tf.train.Saver(variables_to_restore)
+
+      # Calculate predictions.
+      #init_op = tf.global_variables_initializer()
+  with tf.Session() as sess:
+          #sess.run(init_op)
+          tf.get_variable_scope().reuse_variables()
+          print_tensors_in_checkpoint_file("/data/satellitegpu/testing_log5/model.ckpt-35435", "")
+          ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+
+          #saver = tf.train.Saver()
+          #restorer.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
+          #restorer.restore(sess, ckpt.model_checkpoint_path)
+
+          # Restores from checkpoint
+          #saver.restore(sess, ckpt.model_checkpoint_path)
+          #imported_meta_data = tf.train.import_meta_graph("/data/satellitegpu/train_log5/model.ckpt-35435.meta")
+          #vars_in_checkpoint = tf.train.list_variables(os.path.join("/data/satellitegpu/train_log5/model.ckpt-35435"))
+          all_variables = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES)
+          sess.run(tf.variables_initializer(all_variables))
+          temp_saver = tf.train.Saver(
+              var_list=[v for v in all_variables if "ExponentialMovingAverage" not in v.name])
+          #ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+          #print('Loading checkpoint %s' % ckpt.model_checkpoint_path)
+          temp_saver.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
+          #restorer.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
+          #restorer.restore(sess, ckpt.model_checkpoint_path)
+
+          #imported_meta_data = tf.train.import_meta_graph("/data/satellitegpu/testing_log5/model.ckpt-35435.meta")
+          #imported_meta_data.restore(sess, '/data/satellitegpu/train_log5/model.ckpt-35435')
+          #temp_saver.restore(sess, ckpt.model_checkpoint_path)
+
+          #imported_meta_data.restore(sess, tf.train.latest_checkpoint('/data/satellitegpu/train_log5/'))
+          #saver.restore(sess, "/data/satellitegpu/train_log4/model.ckpt-98741")
+          # Assuming model_checkpoint_path looks something like:
+          #   /my-favorite-path/cifar10_train/model.ckpt-0,
+          # extract global_step from it.
+          #global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+
+
+      #noise = get_init_vector(FLAGS.generator_init_vector_size, FLAGS.batch_size)
+      #noise = tfgan.features.condition_tensor_from_onehot(noise, one_hot_labels)
+      #images, end_points_gen = dcgan.generator(noise, is_training=False)
 
 
 def _get_real_data(num_images_generated, dataset_dir):

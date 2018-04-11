@@ -16,7 +16,7 @@ flags.DEFINE_integer('batch_size', 64, 'The number of images in each batch.')
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('train_log_dir', '/data/satellitegpu/train_log5',
+flags.DEFINE_string('train_log_dir', '/data/satellitegpu/train_log7',
                     'Directory where to write event logs.')
 
 flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
@@ -94,6 +94,9 @@ def main(_):
 
         # Get the GANTrain ops using the custom optimizers and optional
         # discriminator weight clipping.
+
+
+
         with tf.name_scope('train'):
             gen_lr, dis_lr = _learning_rate()
             gen_opt, dis_opt = _optimizer(gen_lr, dis_lr, FLAGS.use_sync_replicas)
@@ -122,6 +125,10 @@ def main(_):
         opts = tf.GPUOptions(per_process_gpu_memory_fraction=0.7000)
         conf = tf.ConfigProto(gpu_options=opts)
 
+        print("number of trainable variables")
+        nn = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+        print(nn)
+
         tfgan.gan_train(
             train_ops,
             hooks=(
@@ -130,8 +137,7 @@ def main(_):
                     sync_hooks),
             logdir=FLAGS.train_log_dir,
             master=FLAGS.master,
-            is_chief=FLAGS.task == 0,
-            config=conf
+            is_chief=FLAGS.task == 0
         )
 
 
@@ -151,7 +157,6 @@ def _optimizer(gen_lr, dis_lr, use_sync_replicas):
     """Get an optimizer, that's optionally synchronous."""
     # generator_opt = tf.train.RMSPropOptimizer(gen_lr, decay=.9, momentum=0.1)
     # discriminator_opt = tf.train.RMSPropOptimizer(dis_lr, decay=.95, momentum=0.1)
-    kwargs = {'beta1': 0.5, 'beta2': 0.999}
     generator_opt = tf.train.AdamOptimizer(gen_lr, beta1=0.5, beta2=0.999)
     discriminator_opt = tf.train.AdamOptimizer(dis_lr, beta1=0.5, beta2=0.999)
 
