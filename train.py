@@ -119,7 +119,7 @@ def main(_):
             name='status_message')
         if FLAGS.max_number_of_steps == 0: return
 
-        opts = tf.GPUOptions(per_process_gpu_memory_fraction=0.666)
+        opts = tf.GPUOptions(per_process_gpu_memory_fraction=0.7000)
         conf = tf.ConfigProto(gpu_options=opts)
 
         tfgan.gan_train(
