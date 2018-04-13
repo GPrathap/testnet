@@ -22,6 +22,8 @@ from cifar import networkssate as networks, data_provider_sattelite as data_prov
 from cifar import dcgansatelite as dcgan
 from cifar import util
 from tensorflow.contrib import predictor, slim
+import matplotlib.pyplot as plt
+import numpy as np
 
 flags = tf.flags
 FLAGS = tf.flags.FLAGS
@@ -63,7 +65,7 @@ flags.DEFINE_boolean('write_to_disk', True, 'If `True`, run images to disk.')
 flags.DEFINE_integer('generator_init_vector_size', 100, 'Generator initialization vector size')
 flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/testing_log5',
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log9',
                     'Directory where the model was written to.')
 
 
@@ -94,6 +96,12 @@ def _graph_def_from_par_or_disk(filename):
 
 def main(_, run_eval_loop=True):
   tf.reset_default_graph()
+
+  def name_in_checkpoint(var):
+      if "Discriminator/" in var.op.name:
+          return var.op.name.replace("Discriminator/", "Discriminator/Discriminator/")
+
+
   with tf.name_scope('inputs1'):
       real_images, one_hot_labels, _, num_classes = data_provider_sattelite.provide_data(
         FLAGS.batch_size, FLAGS.dataset_dir)
@@ -101,50 +109,41 @@ def main(_, run_eval_loop=True):
 
       logits, end_points_des, feature, net_h7 = dcgan.discriminator(real_images)
 
+      variables_to_restore = slim.get_model_variables()
+      variables_to_restore = {name_in_checkpoint(var): var for var in variables_to_restore}
+      restorer = tf.train.Saver(variables_to_restore)
+
+
+
       #variables_to_restore = slim.get_model_variables()
       #restorer = tf.train.Saver(variables_to_restore)
 
       # Calculate predictions.
       #init_op = tf.global_variables_initializer()
   with tf.Session() as sess:
-          #sess.run(init_op)
-          tf.get_variable_scope().reuse_variables()
-          print_tensors_in_checkpoint_file("/data/satellitegpu/testing_log5/model.ckpt-35435", "")
+          sess.run(tf.global_variables_initializer())
+          sess.run(tf.local_variables_initializer())
+
+      #tf.get_variable_scope().reuse_variables()
+
           ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+          restorer.restore(sess, ckpt.model_checkpoint_path)
+          #print (sess.run(feature, feed_dict={real_images:real_images}))
+          #img, lbl = sess.run([real_images, one_hot_labels])
+          #print (sess.run(lbl))
+          coord = tf.train.Coordinator()
+          threads = tf.train.start_queue_runners(coord=coord)
+          for batch_index in range(5):
+              img, lbl = sess.run([real_images, one_hot_labels])
+              features = sess.run(feature, feed_dict={real_images: img})
+              print(lbl)
+          # Stop the threads
+          coord.request_stop()
 
-          #saver = tf.train.Saver()
-          #restorer.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
-          #restorer.restore(sess, ckpt.model_checkpoint_path)
+          # Wait for threads to stop
+          coord.join(threads)
+          sess.close()
 
-          # Restores from checkpoint
-          #saver.restore(sess, ckpt.model_checkpoint_path)
-          #imported_meta_data = tf.train.import_meta_graph("/data/satellitegpu/train_log5/model.ckpt-35435.meta")
-          #vars_in_checkpoint = tf.train.list_variables(os.path.join("/data/satellitegpu/train_log5/model.ckpt-35435"))
-          all_variables = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES)
-          sess.run(tf.variables_initializer(all_variables))
-          temp_saver = tf.train.Saver(
-              var_list=[v for v in all_variables if "ExponentialMovingAverage" not in v.name])
-          #ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-          #print('Loading checkpoint %s' % ckpt.model_checkpoint_path)
-          temp_saver.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
-          #restorer.restore(sess, "/data/satellitegpu/testing_log5/model.ckpt-35435")
-          #restorer.restore(sess, ckpt.model_checkpoint_path)
-
-          #imported_meta_data = tf.train.import_meta_graph("/data/satellitegpu/testing_log5/model.ckpt-35435.meta")
-          #imported_meta_data.restore(sess, '/data/satellitegpu/train_log5/model.ckpt-35435')
-          #temp_saver.restore(sess, ckpt.model_checkpoint_path)
-
-          #imported_meta_data.restore(sess, tf.train.latest_checkpoint('/data/satellitegpu/train_log5/'))
-          #saver.restore(sess, "/data/satellitegpu/train_log4/model.ckpt-98741")
-          # Assuming model_checkpoint_path looks something like:
-          #   /my-favorite-path/cifar10_train/model.ckpt-0,
-          # extract global_step from it.
-          #global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-
-
-      #noise = get_init_vector(FLAGS.generator_init_vector_size, FLAGS.batch_size)
-      #noise = tfgan.features.condition_tensor_from_onehot(noise, one_hot_labels)
-      #images, end_points_gen = dcgan.generator(noise, is_training=False)
 
 
 def _get_real_data(num_images_generated, dataset_dir):

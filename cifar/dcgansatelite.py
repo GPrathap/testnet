@@ -45,7 +45,7 @@ def _validate_image_inputs(inputs):
 def discriminator(inputs,
                   depth=8,
                   is_training=True,
-                  reuse=True,
+                  reuse=tf.AUTO_REUSE,
                   scope='Discriminator',
                   fused_batch_norm=False):
   """Discriminator network for DCGAN.
@@ -93,7 +93,7 @@ def discriminator(inputs,
   end_points = {}
   with tf.variable_scope(scope, values=[inputs], reuse=reuse) as scope:
     with slim.arg_scope([normalizer_fn], **normalizer_fn_args):
-      with slim.arg_scope([slim.conv2d],
+      with slim.arg_scope([slim.convolution2d],
                           stride=2,
                           kernel_size=4,
                           activation_fn=tf.nn.leaky_relu):
@@ -162,7 +162,7 @@ def generator(inputs,
               final_size=256,
               num_outputs=3,
               is_training=True,
-              reuse=None,
+              reuse=tf.AUTO_REUSE,
               scope='Generator',
               fused_batch_norm=False):
 
@@ -191,9 +191,8 @@ def generator(inputs,
   w_init = tf.random_normal_initializer(stddev=0.02)
   gamma_init = tf.random_normal_initializer(1., 0.02)
 
-  with tf.variable_scope(scope, reuse=reuse):
-      #tl.layers.set_name_reuse(reuse)
-      with tf.variable_scope(scope, values=[inputs], reuse=reuse) as scope:
+
+  with tf.variable_scope(scope, values=[inputs], reuse=reuse) as scope:
           with slim.arg_scope([normalizer_fn], **normalizer_fn_args):
               with slim.arg_scope([slim.conv2d_transpose],
                                   normalizer_fn=normalizer_fn,
@@ -204,7 +203,7 @@ def generator(inputs,
 
                   scope = 'deconv0'
                   net_h0 = slim.conv2d_transpose(
-                      net, gf_dim * 32 * s64 * s64, stride=1, padding='VALID', scope=scope)
+                      net, gf_dim * 32, stride=1, padding='VALID', scope=scope)
                   end_points[scope] = net_h0
 
                   scope = 'deconv1'
