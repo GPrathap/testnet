@@ -65,37 +65,20 @@ flags.DEFINE_boolean('write_to_disk', True, 'If `True`, run images to disk.')
 flags.DEFINE_integer('generator_init_vector_size', 100, 'Generator initialization vector size')
 flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log9',
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log12',
                     'Directory where the model was written to.')
 
+#def getClassIndex(classList, ):
 
-INPUT_TENSOR = 'g/in:0'
-OUTPUT_TENSOR = 'logits:0'
-MODEL_GRAPH_DEF = "/data/satellitegpu/train_log4/graph.pbtxt"
 
-def geoxt_score(images, graph_def_filename=None, input_tensor=INPUT_TENSOR,
-                output_tensor=OUTPUT_TENSOR, num_batches=1):
-
-  images.shape.assert_is_compatible_with([None, 256, 256, 3])
-
-  graph_def = _graph_def_from_par_or_disk(graph_def_filename)
-  mnist_classifier_fn = lambda x: tfgan.eval.run_image_classifier(  # pylint: disable=g-long-lambda
-      x, graph_def, input_tensor, output_tensor)
-
-  score = tfgan.eval.classifier_score(
-      images, mnist_classifier_fn, num_batches)
-  score.shape.assert_is_compatible_with([])
-
-  return score
-
-def _graph_def_from_par_or_disk(filename):
-  if filename is None:
-    return tfgan.eval.get_graph_def_from_resource(MODEL_GRAPH_DEF)
-  else:
-    return tfgan.eval.get_graph_def_from_disk(MODEL_GRAPH_DEF)
 
 def main(_, run_eval_loop=True):
   tf.reset_default_graph()
+  dataset_type = "train"
+  classesList = ["agricultural", 'airplane', 'baseballdiamond', 'beach', 'buildings', 'chaparral'
+      , 'denseresidential', 'forest', 'freeway', 'golfcourse', 'harbor', 'intersection', 'mediumresidential',
+                 'mobilehomepark', 'overpass', 'parkinglot', 'river', 'runway', 'sparseresidential',
+                 'storagetanks', 'tenniscourt']
 
   def name_in_checkpoint(var):
       if "Discriminator/" in var.op.name:
@@ -103,8 +86,9 @@ def main(_, run_eval_loop=True):
 
 
   with tf.name_scope('inputs1'):
+
       real_images, one_hot_labels, _, num_classes = data_provider_sattelite.provide_data(
-        FLAGS.batch_size, FLAGS.dataset_dir)
+          FLAGS.batch_size, FLAGS.dataset_dir, split_name=dataset_type)
 
 
       logits, end_points_des, feature, net_h7 = dcgan.discriminator(real_images)
@@ -133,10 +117,13 @@ def main(_, run_eval_loop=True):
           #print (sess.run(lbl))
           coord = tf.train.Coordinator()
           threads = tf.train.start_queue_runners(coord=coord)
-          for batch_index in range(5):
+          for batch_index in range(1):
               img, lbl = sess.run([real_images, one_hot_labels])
               features = sess.run(feature, feed_dict={real_images: img})
-              print(lbl)
+              classIndex = np.argmax(lbl, axis=1)
+              np.save(FLAGS.checkpoint_dir + "/features_"+dataset_type+".npy", features)
+              np.save(FLAGS.checkpoint_dir + "/features_"+dataset_type+"_class_label.npy", classIndex)
+              print(classIndex)
           # Stop the threads
           coord.request_stop()
 

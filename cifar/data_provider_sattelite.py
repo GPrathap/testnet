@@ -53,7 +53,7 @@ def provide_data(batch_size, dataset_dir, dataset_name='satellite',
       dataset,
       common_queue_capacity=5 * batch_size,
       common_queue_min=batch_size,
-      shuffle=(split_name == 'train'))
+      shuffle=(split_name == split_name))
   [image, label] = provider.get(['image', 'label'])
 
   # Preprocess the images.

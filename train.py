@@ -70,14 +70,11 @@ def main(_):
             #        FLAGS.batch_size, FLAGS.dataset_dir)
 
         noise = get_init_vector(FLAGS.generator_init_vector_size, FLAGS.batch_size)
-        if FLAGS.conditional:
-            generator_fn = networks.conditional_generator
-            discriminator_fn = networks.conditional_discriminator
-            generator_inputs = (noise, one_hot_labels)
-        else:
-            generator_fn = networks.generator
-            discriminator_fn = networks.discriminator
-            generator_inputs = noise
+
+        generator_fn = networks.conditional_generator
+        discriminator_fn = networks.conditional_discriminator
+        generator_inputs = (noise, one_hot_labels)
+
         gan_model = tfgan.gan_model(
             generator_fn,
             discriminator_fn,

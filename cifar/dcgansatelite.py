@@ -100,8 +100,8 @@ def discriminator(inputs,
         net = inputs
 
         scope = 'conv0'
-        net_h0 = slim.convolution2d(net, df_dim, normalizer_fn=normalizer_fn,
-                                    normalizer_params=normalizer_fn_args, scope=scope)
+        net_h0 = slim.convolution2d(net, df_dim, normalizer_fn=None,
+                                    normalizer_params=None, scope=scope)
         end_points[scope] = net_h0
 
         scope = 'conv1'
@@ -119,7 +119,7 @@ def discriminator(inputs,
                                     normalizer_params=normalizer_fn_args, scope=scope)
         end_points[scope] = net_h3
 
-        global_max1 = slim.max_pool2d(net_h3, kernel_size=(4, 4), stride=1, padding='SAME', scope='maxpool1')
+        global_max1 = slim.max_pool2d(net_h3, kernel_size=(4, 4), stride=2, padding='SAME', scope='maxpool1')
         global_max1 = slim.flatten(global_max1, scope='flatten1')
 
         scope = 'conv4'
@@ -127,19 +127,22 @@ def discriminator(inputs,
                                     normalizer_params=normalizer_fn_args, scope=scope)
         end_points[scope] = net_h4
 
-        global_max2 = slim.max_pool2d(net_h4, kernel_size=(2, 2), stride=1, padding='SAME', scope='maxpool2')
+        global_max2 = slim.max_pool2d(net_h4, kernel_size=(2, 2), stride=4, padding='SAME', scope='maxpool2')
         global_max2 = slim.flatten(global_max2, scope='flatten2')
 
         scope = 'conv5'
-        net_h5 = slim.convolution2d(net_h4, 16 * df_dim, normalizer_fn=normalizer_fn,
+        net_h5 = slim.convolution2d(net_h4, 32 * df_dim, normalizer_fn=normalizer_fn,
                                     normalizer_params=normalizer_fn_args,scope=scope)
         end_points[scope] = net_h5
 
-        global_max3 =slim.flatten(net_h5, scope='flatten3')
+        global_max3 = slim.max_pool2d(net_h5, kernel_size=(2, 2), stride=2, padding='SAME', scope='maxpool3')
+        global_max3 = slim.flatten(global_max3, scope='flatten3')
 
-        feature = tf.concat(values = [global_max1, global_max2, global_max3], axis=1, name='d/concat_layer1')
+        #global_max3 =slim.flatten(net_h5, scope='flatten3')
+
+        feature = tf.concat(values = [global_max3], axis=1, name='d/concat_layer1')
         scope="conv6"
-        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//64), activation_fn=tf.identity,
+        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//2), activation_fn=tf.identity,
                     normalizer_fn=None, scope='fully_connected_layer1')
         end_points[scope] = net_h6
 
@@ -219,7 +222,7 @@ def generator(inputs,
                   end_points[scope] = net_h3
 
                   scope = 'deconv4'
-                  net_h4 = slim.conv2d_transpose(net_h3, gf_dim * 1, scope=scope)
+                  net_h4 = slim.conv2d_transpose(net_h3, gf_dim * 2, scope=scope)
                   end_points[scope] = net_h4
 
                   scope = 'deconv5'

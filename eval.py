@@ -27,7 +27,7 @@ tfgan = tf.contrib.gan
 
 flags.DEFINE_string('master', '', 'Name of the TensorFlow master to use.')
 
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log5',
+flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log9',
                     'Directory where the model was written to.')
 
 flags.DEFINE_string('eval_dir', '/data/satellitegpu/result5',
