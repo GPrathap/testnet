@@ -110,7 +110,7 @@ def main(_):
                     y[i] = j
                     break
         
-        feats = np.zeros((lens, 14336))
+        feats = np.zeros((lens, 57344))
 
         for idx in range(batch_idxs):
             batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
