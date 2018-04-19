@@ -22,7 +22,7 @@ Usage : see README.md
 """
 
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 100, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 200, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", 30000, "The size of train images [np.inf]")
@@ -154,14 +154,16 @@ def main(_):
             for idx in range(batch_idxs):
                 batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
                 # get real images
-                batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
+                batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
+                                   resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
                 batch_images = np.array(batch).astype(np.float32)
                 batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
                 #batch_z = np.transpose(create_mine_grid( 1, z_dim, FLAGS.batch_size, 99, None, True, True))
                 start_time = time.time()
                 # updates the discriminator
                 errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
-                # updates the generator, run generator twice to make sure that d_loss does not go to zero (difference from paper)
+                # updates the generator, run generator twice to make sure that d_loss does not go to
+                #  zero (difference from paper)
                 for _ in range(2):
                     errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
                 print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
