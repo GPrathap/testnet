@@ -179,7 +179,7 @@ def main(_):
                                 name='./{}/train_{:02d}_{:04d}'.format(FLAGS.sample_dir, epoch, idx), dtype=None, fig_idx=2838)
                 '''
                 save_images(img, [8, 8],
-                            './{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
+                            '{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
                 print("[Sample] d_loss: %.8f, g_loss: %.8f" % (errD, errG))
 #                for i in range(len(D)):
 #                    print D[i].shape
