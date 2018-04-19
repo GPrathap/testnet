@@ -60,7 +60,7 @@ flags.DEFINE_boolean('write_to_disk', True, 'If `True`, run images to disk.')
 flags.DEFINE_integer('generator_init_vector_size', 100, 'Generator initialization vector size')
 flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
-flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log12',
+flags.DEFINE_string('checkpoint_dir', '/data/checkpoint1',
                     'Directory where the model was written to.')
 
 X_train = np.load(FLAGS.checkpoint_dir + '/features_train.npy')
