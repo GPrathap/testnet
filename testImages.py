@@ -74,7 +74,7 @@ flags.DEFINE_string('checkpoint_dir', '/data/satellitegpu/train_log12',
 
 def main(_, run_eval_loop=True):
   tf.reset_default_graph()
-  dataset_type = "train"
+  dataset_type = "test"
   classesList = ["agricultural", 'airplane', 'baseballdiamond', 'beach', 'buildings', 'chaparral'
       , 'denseresidential', 'forest', 'freeway', 'golfcourse', 'harbor', 'intersection', 'mediumresidential',
                  'mobilehomepark', 'overpass', 'parkinglot', 'river', 'runway', 'sparseresidential',
@@ -108,8 +108,7 @@ def main(_, run_eval_loop=True):
 
       #tf.get_variable_scope().reuse_variables()
 
-          ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-          restorer.restore(sess, ckpt.model_checkpoint_path)
+
           #print (sess.run(feature, feed_dict={real_images:real_images}))
           #img, lbl = sess.run([real_images, one_hot_labels])
           #print (sess.run(lbl))
@@ -117,11 +116,10 @@ def main(_, run_eval_loop=True):
           threads = tf.train.start_queue_runners(coord=coord)
           for batch_index in range(1):
               img, lbl = sess.run([real_images, one_hot_labels])
-              features = sess.run(feature, feed_dict={real_images: img})
-              classIndex = np.argmax(lbl, axis=1)
-              np.save(FLAGS.checkpoint_dir + "/features_"+dataset_type+".npy", features)
-              np.save(FLAGS.checkpoint_dir + "/features_"+dataset_type+"_class_label.npy", classIndex)
-              print(classIndex)
+              for image in img:
+                plt.imshow(image)
+                plt.show()
+                print(img.shape)
           # Stop the threads
           coord.request_stop()
 

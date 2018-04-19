@@ -6,7 +6,7 @@ Created on Mon Oct 30 20:47:21 2017
 @author: ldy
 """
 import scipy.misc
-import imageio
+
 
 import numpy as np
 

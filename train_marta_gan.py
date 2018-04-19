@@ -34,8 +34,8 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "samples", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
@@ -100,7 +100,7 @@ def main(_):
                       .minimize(g_loss, var_list=g_vars)
 
     sess=tf.Session()
-    tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
+    #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
     sess.run(tf.initialize_all_variables())
 
     # load checkpoints
@@ -148,7 +148,7 @@ def main(_):
             # load image data
             batch_idxs = min(len(data_files), FLAGS.train_size) // FLAGS.batch_size
 
-            for idx in xrange(batch_idxs):
+            for idx in range(batch_idxs):
                 batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
                 # get real images
                 batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]

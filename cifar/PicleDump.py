@@ -1,9 +1,9 @@
 import glob
 
 from six.moves import cPickle as pickle
-import cv2 as cv
 from sklearn import preprocessing
 import numpy as np
+import scipy.misc
 # "
 #
 # a = {"sdfg", "sdfsdf"}
@@ -21,8 +21,8 @@ def createFiles(path, classes):
     datalist["images"] = []
     datalist["labels"] = []
     for filename in glob.iglob(path, recursive=True):
-        image = cv.imread(filename)
-        image = np.array(image, dtype=np.uint8)
+
+        image = scipy.misc.imread(filename).astype(np.float)
         # image = tf.gfile.FastGFile(filename, 'rb').read()
         currentClass = ""
         for cla in classes:
@@ -45,14 +45,14 @@ classesList = ["agricultural",'airplane','baseballdiamond','beach','buildings','
 train = False
 if train:
     lb = preprocessing.LabelBinarizer()
-    datapath = "/home/runge/Downloads/data/uc_train_256_data/**.jpg"
+    datapath = "/data/images/uc_train_256_data/**.jpg"
     datalist = createFiles(datapath, classesList)
     with open("/data/satellitegpu/satellite_train.pickle", 'wb') as f:
          pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)
     download_and_convert_satellite.run("/data/satellitegpu/")
 else:
     lb = preprocessing.LabelBinarizer()
-    datapath = "/home/runge/Downloads/data/uc_test_256/**.jpg"
+    datapath = "/data/images/uc_test_256/**.jpg"
     datalist = createFiles(datapath, classesList)
     with open("/data/satellitegpu/satellite_test.pickle", 'wb') as f:
         pickle.dump(datalist, f, protocol=pickle.HIGHEST_PROTOCOL)

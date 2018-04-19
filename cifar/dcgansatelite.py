@@ -86,7 +86,7 @@ def discriminator(inputs,
   inp_shape = inputs.get_shape().as_list()[1]
 
   k = 5
-  df_dim = 16  # Dimension of discrim filters in first conv layer. [64]
+  df_dim = 2  # Dimension of discrim filters in first conv layer. [64]
   w_init = tf.random_normal_initializer(stddev=0.02)
   gamma_init = tf.random_normal_initializer(1., 0.02)
 
@@ -100,8 +100,8 @@ def discriminator(inputs,
         net = inputs
 
         scope = 'conv0'
-        net_h0 = slim.convolution2d(net, df_dim, normalizer_fn=None,
-                                    normalizer_params=None, scope=scope)
+        net_h0 = slim.convolution2d(net, df_dim, normalizer_fn=normalizer_fn,
+                                    normalizer_params=normalizer_fn_args, scope=scope)
         end_points[scope] = net_h0
 
         scope = 'conv1'
@@ -135,27 +135,36 @@ def discriminator(inputs,
                                     normalizer_params=normalizer_fn_args,scope=scope)
         end_points[scope] = net_h5
 
-        global_max3 = slim.max_pool2d(net_h5, kernel_size=(2, 2), stride=2, padding='SAME', scope='maxpool3')
-        global_max3 = slim.flatten(global_max3, scope='flatten3')
-
-        #global_max3 =slim.flatten(net_h5, scope='flatten3')
-
-        feature = tf.concat(values = [global_max3], axis=1, name='d/concat_layer1')
-        scope="conv6"
-        net_h6 = slim.fully_connected(feature, num_outputs=int(feature.shape[1]//2), activation_fn=tf.identity,
-                    normalizer_fn=None, scope='fully_connected_layer1')
+        scope = 'conv6'
+        net_h6 = slim.convolution2d(net_h5, 64 * df_dim, normalizer_fn=normalizer_fn,
+                                    normalizer_params=normalizer_fn_args, scope=scope)
         end_points[scope] = net_h6
 
-        scope = "conv7"
-        net_h7 = slim.fully_connected(net_h6, num_outputs=1, activation_fn=tf.identity,
-                                      normalizer_fn=None, scope='fully_connected_layer2')
+        scope = 'conv7'
+        net_h7 = slim.convolution2d(net_h6, 128 * df_dim, normalizer_fn=normalizer_fn,
+                                    normalizer_params=normalizer_fn_args, scope=scope)
         end_points[scope] = net_h7
 
-        logits = net_h7
-        net_h7.outputs = tf.nn.sigmoid(net_h7)
+        scope = 'conv8'
+        net_h8 = slim.convolution2d(net_h7, 256 * df_dim, normalizer_fn=normalizer_fn,
+                                    normalizer_params=normalizer_fn_args, scope=scope)
+        end_points[scope] = net_h8
+
+
+        #global_max3 = slim.max_pool2d(net_h8, kernel_size=(2, 2), stride=2, padding='SAME', scope='maxpool3')
+        #global_max3 = slim.flatten(global_max3, scope='flatten3')
+
+        #global_max3 = slim.flatten(net_h5, scope='flatten3')
+        scope = 'conv9'
+        net_h9 = slim.fully_connected(net_h8, num_outputs=1, activation_fn=tf.identity,
+                                      normalizer_fn=None, scope='fully_connected_layer1')
+        net_h9.outputs = tf.nn.sigmoid(net_h9)
+        end_points[scope] = net_h9
+
+        logits = net_h9
         end_points['logits'] = logits
 
-        return logits, end_points, feature, net_h7
+        return logits, end_points, global_max2, net_h9
 
 
 # TODO(joelshor): Use fused batch norm by default. Investigate why some GAN
@@ -200,7 +209,9 @@ def generator(inputs,
               with slim.arg_scope([slim.conv2d_transpose],
                                   normalizer_fn=normalizer_fn,
                                   stride=2,
-                                  kernel_size=4):
+                                  kernel_size=4,
+                                  activation_fn=tf.nn.leaky_relu):
+
 
                   net = tf.expand_dims(tf.expand_dims(inputs, 1), 1)
 
@@ -230,24 +241,28 @@ def generator(inputs,
                   end_points[scope] = net_h5
 
                   scope = 'deconv6'
-                  net_h6 = slim.conv2d_transpose(net_h5, 3, normalizer_fn=None, activation_fn=None, scope=scope)
+                  net_h6 = slim.conv2d_transpose(net_h5, 8, scope=scope)
                   end_points[scope] = net_h6
 
-                  scope = 'logits'
-                  logits = slim.conv2d(
-                      net_h6,
+                  scope = 'deconv8'
+                  net_h8 = slim.conv2d_transpose(net_h6, 3, normalizer_fn=None, activation_fn=None, scope=scope)
+                  end_points[scope] = net_h8
+
+                  scope = 'deconv7'
+                  net_h9 = slim.conv2d(
+                      net_h8,
                       3,
                       normalizer_fn=None,
                       activation_fn=None,
                       kernel_size=1,
-                      stride=1,
+                      stride=2,
                       padding='VALID',
                       scope=scope)
-                  end_points[scope] = logits
+                  end_points[scope] = net_h9
 
-                  net_h6.outputs = tf.nn.tanh(logits)
-                  scope = 'deconv6'
-                  end_points[scope] = net_h6
+                  scope = 'logits'
+                  logits = net_h9
+                  end_points[scope] = logits
 
   return logits, end_points
 
