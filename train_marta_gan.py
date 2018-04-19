@@ -76,12 +76,15 @@ def main(_):
 
     # cost for updating discriminator and generator
     # discriminator: real images are labelled as 1
-    d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d2_logits, labels=tf.ones_like(d2_logits)))    # real == 1
+    d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d2_logits,
+                                                                         labels=tf.ones_like(d2_logits)))    # real == 1
     # discriminator: images from generator (fake) are labelled as 0
-    d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits, labels=tf.zeros_like(d_logits)))     # fake == 0
+    d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits,
+                                                                         labels=tf.zeros_like(d_logits)))     # fake == 0
     d_loss = d_loss_real + d_loss_fake
     # generator: try to make the the fake images look real (1)
-    g_loss1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits, labels=tf.ones_like(d_logits)))
+    g_loss1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits,
+                                                                     labels=tf.ones_like(d_logits)))
     g_loss2 = tf.reduce_mean(tf.nn.l2_loss(feature_real-feature_fake))/(FLAGS.image_size*FLAGS.image_size)
     g_loss = g_loss1+g_loss2
     #g_loss = tf.reduce_mean(tf.abs(feature_real-feature_fake))
@@ -153,7 +156,7 @@ def main(_):
                 # get real images
                 batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
                 batch_images = np.array(batch).astype(np.float32)
-                #batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                # batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
                 batch_z = np.transpose(create_mine_grid( 1, z_dim, FLAGS.batch_size, 99, None, True, True))
                 start_time = time.time()
                 # updates the discriminator

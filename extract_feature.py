@@ -24,7 +24,7 @@ flags = tf.app.flags
 flags.DEFINE_integer("epoch", 100, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
-flags.DEFINE_integer("train_size", np.inf, "The size of train images [np.inf]")
+flags.DEFINE_integer("train_size", 40000, "The size of train images [np.inf]")
 flags.DEFINE_integer("batch_size", 1, "The number of batch images [64]")
 flags.DEFINE_integer("image_size", 256, "The size of image to use (will be center cropped) [108]")
 flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
@@ -52,15 +52,14 @@ def main(_):
         os.makedirs(FLAGS.sample_dir)
 
 
-    # with tf.device("/gpu:0"): # <-- if you have a GPU machine
-    real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size, FLAGS.c_dim], name='real_images')
+    with tf.device("/gpu:0"): # <-- if you have a GPU machine
+      real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size, FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
     net_d, d_logits, features = discriminator_simplified_api(real_images, is_train=FLAGS.is_train, reuse=False)
 
 
     sess=tf.Session()
-    tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
     sess.run(tf.initialize_all_variables())
 
     # load checkpoints
@@ -95,7 +94,7 @@ def main(_):
 
         print('extract traning feature')
 
-        data_files = glob(os.path.join("/data", 'uc_train_256_data', "*.jpg"))
+        data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
         shuffle(data_files)
         
        
@@ -143,8 +142,8 @@ def main(_):
         
     
         y = np.zeros(lens, dtype=np.uint8)
-        for i in xrange(lens):
-            for j in xrange(len(style_labels)):
+        for i in range(lens):
+            for j in range(len(style_labels)):
                 if style_labels[j] in data_files[i]:
                     y[i] = j
                     break
@@ -152,7 +151,7 @@ def main(_):
         feats = np.zeros((lens, 14336))
 
     
-        for idx in xrange(batch_idxs):
+        for idx in range(batch_idxs):
             batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
 
             batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
