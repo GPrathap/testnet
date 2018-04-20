@@ -58,36 +58,27 @@ def main(_):
     # z --> generator for training
     net_d, d_logits, features = discriminator_simplified_api(real_images, is_train=FLAGS.is_train, reuse=False)
 
-
+    saver = tf.train.Saver()
     sess=tf.Session()
     sess.run(tf.initialize_all_variables())
 
     # load checkpoints
     print("[*] Loading checkpoints...")
-    model_dir = "%s_%s_%s" % (FLAGS.dataset, 64, FLAGS.output_size)
-    save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
-    #print save_dir
-    # load the latest checkpoints
+    ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+    if ckpt and ckpt.model_checkpoint_path:
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print("[*] Loading checkpoints...")
+    else:
+        print("[*] Loading checkpoints failed ...")
+
     nums = [75]
     for num in nums:
-        net_g_name = os.path.join(save_dir, '%dnet_g.npz'%num)
-        net_d_name = os.path.join(save_dir, '%dnet_d.npz'%num)
 
-        print(net_g_name, net_d_name)
-
-        if not (os.path.exists(net_g_name) and os.path.exists(net_d_name)):
-            print("[!] Loading checkpoints failed!")
-        else:
-            net_d_loaded_params = tl.files.load_npz(name=net_d_name)
-            tl.files.assign_params(sess, net_d_loaded_params, net_d)
-            print("[*] Loading checkpoints SUCCESS!")
-    
         NUM_STYLE_LABELS =  21
         style_label_file = './style_names.txt'
         style_labels = list(np.loadtxt(style_label_file, str, delimiter='\n'))
         if NUM_STYLE_LABELS > 0:
             style_labels = style_labels[:NUM_STYLE_LABELS]
-
 
         if not os.path.exists(FLAGS.feature_dir):
             os.makedirs(FLAGS.feature_dir)
@@ -131,7 +122,7 @@ def main(_):
         np.save('features/label%d_train.npy'%num, y)
 
         print('extract testing feature')
-        data_files = glob(os.path.join("/data", 'uc_test_256', "*.jpg"))
+        data_files = glob(os.path.join("/data/images/", 'uc_test_256', "*.jpg"))
         shuffle(data_files)
         #data_files = data_files[0:5000]
         
@@ -148,7 +139,7 @@ def main(_):
                     y[i] = j
                     break
         
-        feats = np.zeros((lens, 14336))
+        feats = np.zeros((lens, 57344))
 
     
         for idx in range(batch_idxs):

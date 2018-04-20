@@ -104,26 +104,6 @@ def main(_):
     #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
     sess.run(tf.global_variables_initializer())
 
-    # load checkpoints
-
-    #model_dir = "%s_%s_%s" % (FLAGS.dataset, 64, FLAGS.output_size)
-    #save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
-    # load the latest checkpoints
-    #for num in xrange(70, 71):
-    #net_g_name = os.path.join(save_dir, 'net_g.npz')
-    #net_d_name = os.path.join(save_dir, 'net_d.npz')
-
-    #print(net_g_name, net_d_name)
-
-    #if not (os.path.exists(net_g_name) and os.path.exists(net_d_name)):
-    #    print("[!] Loading checkpoints failed!")
-    #else:
-    #    net_g_loaded_params = tl.files.load_npz(name=net_g_name)
-    #    net_d_loaded_params = tl.files.load_npz(name=net_d_name)
-    #    tl.files.assign_params(sess, net_g_loaded_params, net_g)
-    #    tl.files.assign_params(sess, net_d_loaded_params, net_d)
-    #    print("[*] Loading checkpoints SUCCESS!")
-
     data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
     ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
@@ -154,17 +134,14 @@ def main(_):
 
             for idx in range(batch_idxs):
                 batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
-                # get real images
                 batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
                                    resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
                 batch_images = np.array(batch).astype(np.float32)
                 batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
-                #batch_z = np.transpose(create_mine_grid( 1, z_dim, FLAGS.batch_size, 99, None, True, True))
+
                 start_time = time.time()
-                # updates the discriminator
+
                 errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
-                # updates the generator, run generator twice to make sure that d_loss does not go to
-                #  zero (difference from paper)
                 for _ in range(2):
                     errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
                 print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
@@ -175,48 +152,20 @@ def main(_):
                 iter_counter += 1
 
             if np.mod(epoch, 1) == 0:
-                # generate and visualize generated images
-                #img, errD, errG = sess.run([net_g2.outputs, d_loss, g_loss], feed_dict={z : sample_seed, real_images: sample_images})
                 img, errG = sess.run([net_g2, g_loss],
                                      feed_dict={z : sample_seed, real_images: sample_images})
                 D, D_, errD = sess.run([net_d3, net_d3, d_loss_real],
                                        feed_dict={real_images: sample_images})
 
-                '''
-                img255 = (np.array(img) + 1) / 2 * 255
-                tl.visualize.images2d(images=img255, second=0, saveable=True,
-                                name='./{}/train_{:02d}_{:04d}'.format(FLAGS.sample_dir, epoch, idx), dtype=None, fig_idx=2838)
-                '''
                 save_images(img, [8, 8],
                             '{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
                 print("[Sample] d_loss: %.8f, g_loss: %.8f" % (errD, errG))
-#                for i in range(len(D)):
-#                    print D[i].shape
-                #print D[-1], D_, sigmoid(D[-1]), sigmoid(D[-1])==D_
                 sys.stdout.flush()
 
             if np.mod(epoch, 5) == 0:
                 print("[*] Saving checkpoints...")
                 save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=5)
                 print("Model saved in path: %s" % save_path)
-
-                #print(epoch)
-                # save current network parameters
-
-                #model_dir = "%s_%s_%s" % (FLAGS.dataset, FLAGS.batch_size, FLAGS.output_size)
-                #save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
-                #if not os.path.exists(save_dir):
-                #    os.makedirs(save_dir)
-                # the latest version location
-                #net_g_name = os.path.join(save_dir, str(epoch)+'net_g.npz')
-                #net_d_name = os.path.join(save_dir, str(epoch)+'net_d.npz')
-                # this version is for future re-check and visualization analysis
-#                    net_g_iter_name = os.path.join(save_dir, 'net_g_%d.npz' % iter_counter)
-#                    net_d_iter_name = os.path.join(save_dir, 'net_d_%d.npz' % iter_counter)
-                #tl.files.save_npz(net_g.all_params, name=net_g_name, sess=sess)
-                #tl.files.save_npz(net_d.all_params, name=net_d_name, sess=sess)
-#                    tl.files.save_npz(net_g.all_params, name=net_g_iter_name, sess=sess)
-#                    tl.files.save_npz(net_d.all_params, name=net_d_iter_name, sess=sess)
                 print("[*] Saving checkpoints SUCCESS!")
 
 
