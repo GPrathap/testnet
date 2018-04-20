@@ -12,7 +12,7 @@ from random import shuffle
 
 from grid_layout import create_mine_grid
 from utils import *
-from network import *
+from network1 import *
 pp = pprint.PrettyPrinter()
 
 """
@@ -42,10 +42,6 @@ flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothin
 FLAGS = flags.FLAGS
 
 
-
-
-
-
 def main(_):
     pp.pprint(flags.FLAGS.__flags)
 
@@ -62,9 +58,9 @@ def main(_):
                                                FLAGS.output_size, FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
-    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=False)
+    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=None)
     # generated fake images --> discriminator
-    net_d, d_logits, feature_fake = discriminator_simplified_api(net_g.outputs, is_train=True, reuse=False)
+    net_d, d_logits, feature_fake = discriminator_simplified_api(net_g, is_train=True, reuse=None)
     # real images --> discriminator
     net_d2, d2_logits, feature_real = discriminator_simplified_api(real_images, is_train=True, reuse=True)
     # sample_z --> generator for evaluation, set is_train to False
@@ -89,22 +85,24 @@ def main(_):
     g_loss = g_loss1+g_loss2
     # g_loss = tf.reduce_mean(tf.abs(feature_real-feature_fake))
     # trainable parameters for updating discriminator and generator
-    g_vars = net_g.all_params   # only updates the generator
-    d_vars = net_d.all_params   # only updates the discriminator
+    #g_vars = net_g.all_params   # only updates the generator
+    #d_vars = net_d.all_params   # only updates the discriminator
 
-    net_g.print_params(False)
+    #net_g.print_params(False)
     print("---------------")
-    net_d.print_params(False)
+    #net_d.print_params(False)
 
     # optimizers for updating discriminator and generator
     d_optim = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1) \
-                      .minimize(d_loss, var_list=d_vars)
+                      .minimize(d_loss)
     g_optim = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1) \
-                      .minimize(g_loss, var_list=g_vars)
+                      .minimize(g_loss)
+
+    saver = tf.train.Saver()
 
     sess=tf.Session()
     #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
 
     # load checkpoints
     print("[*] Loading checkpoints...")
@@ -112,26 +110,24 @@ def main(_):
     save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
     # load the latest checkpoints
     #for num in xrange(70, 71):
-    net_g_name = os.path.join(save_dir, 'net_g.npz')
-    net_d_name = os.path.join(save_dir, 'net_d.npz')
+    #net_g_name = os.path.join(save_dir, 'net_g.npz')
+    #net_d_name = os.path.join(save_dir, 'net_d.npz')
 
-    print(net_g_name, net_d_name)
+    #print(net_g_name, net_d_name)
 
-    if not (os.path.exists(net_g_name) and os.path.exists(net_d_name)):
-        print("[!] Loading checkpoints failed!")
-    else:
-        net_g_loaded_params = tl.files.load_npz(name=net_g_name)
-        net_d_loaded_params = tl.files.load_npz(name=net_d_name)
-        tl.files.assign_params(sess, net_g_loaded_params, net_g)
-        tl.files.assign_params(sess, net_d_loaded_params, net_d)
-        print("[*] Loading checkpoints SUCCESS!")
+    #if not (os.path.exists(net_g_name) and os.path.exists(net_d_name)):
+    #    print("[!] Loading checkpoints failed!")
+    #else:
+    #    net_g_loaded_params = tl.files.load_npz(name=net_g_name)
+    #    net_d_loaded_params = tl.files.load_npz(name=net_d_name)
+    #    tl.files.assign_params(sess, net_g_loaded_params, net_g)
+    #    tl.files.assign_params(sess, net_d_loaded_params, net_d)
+    #    print("[*] Loading checkpoints SUCCESS!")
 
-
-    # TODO: use minbatch to shuffle and iterate
     data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
 
-    # TODO: shuffle sample_files each epoch
+
     sample_seed = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
     if FLAGS.is_train:
 
@@ -143,7 +139,8 @@ def main(_):
 
             # update sample files based on shuffled data
             sample_files = data_files[0:FLAGS.batch_size]
-            sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for sample_file in sample_files]
+            sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
+                                is_grayscale = 0) for sample_file in sample_files]
             sample_images = np.array(sample).astype(np.float32)
             print(sample_images.shape)
             print("[*]Sample images updated!")
@@ -172,6 +169,9 @@ def main(_):
                 sys.stdout.flush()
 
                 iter_counter += 1
+            print("[*] Saving checkpoints...")
+            save_path = saver.save(sess, FLAGS.checkpoint_dir+'/model', global_step=5)
+            print("Model saved in path: %s" % save_path)
             if np.mod(epoch, 1) == 0:
                 # generate and visualize generated images
                 #img, errD, errG = sess.run([net_g2.outputs, d_loss, g_loss], feed_dict={z : sample_seed, real_images: sample_images})
@@ -193,22 +193,22 @@ def main(_):
                 #print D[-1], D_, sigmoid(D[-1]), sigmoid(D[-1])==D_
                 sys.stdout.flush()
 
-            if np.mod(epoch, 5) == 0:
-                print(epoch)
+            #if np.mod(epoch, 5) == 0:
+                #print(epoch)
                 # save current network parameters
-                print("[*] Saving checkpoints...")
-                model_dir = "%s_%s_%s" % (FLAGS.dataset, FLAGS.batch_size, FLAGS.output_size)
-                save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
-                if not os.path.exists(save_dir):
-                    os.makedirs(save_dir)
+
+                #model_dir = "%s_%s_%s" % (FLAGS.dataset, FLAGS.batch_size, FLAGS.output_size)
+                #save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
+                #if not os.path.exists(save_dir):
+                #    os.makedirs(save_dir)
                 # the latest version location
-                net_g_name = os.path.join(save_dir, str(epoch)+'net_g.npz')
-                net_d_name = os.path.join(save_dir, str(epoch)+'net_d.npz')
+                #net_g_name = os.path.join(save_dir, str(epoch)+'net_g.npz')
+                #net_d_name = os.path.join(save_dir, str(epoch)+'net_d.npz')
                 # this version is for future re-check and visualization analysis
 #                    net_g_iter_name = os.path.join(save_dir, 'net_g_%d.npz' % iter_counter)
 #                    net_d_iter_name = os.path.join(save_dir, 'net_d_%d.npz' % iter_counter)
-                tl.files.save_npz(net_g.all_params, name=net_g_name, sess=sess)
-                tl.files.save_npz(net_d.all_params, name=net_d_name, sess=sess)
+                #tl.files.save_npz(net_g.all_params, name=net_g_name, sess=sess)
+                #tl.files.save_npz(net_d.all_params, name=net_d_name, sess=sess)
 #                    tl.files.save_npz(net_g.all_params, name=net_g_iter_name, sess=sess)
 #                    tl.files.save_npz(net_d.all_params, name=net_d_iter_name, sess=sess)
                 print("[*] Saving checkpoints SUCCESS!")
