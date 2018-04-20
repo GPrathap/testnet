@@ -98,16 +98,16 @@ def main(_):
     g_optim = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1) \
                       .minimize(g_loss)
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=4)
 
     sess=tf.Session()
     #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
     sess.run(tf.global_variables_initializer())
 
     # load checkpoints
-    print("[*] Loading checkpoints...")
-    model_dir = "%s_%s_%s" % (FLAGS.dataset, 64, FLAGS.output_size)
-    save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
+
+    #model_dir = "%s_%s_%s" % (FLAGS.dataset, 64, FLAGS.output_size)
+    #save_dir = os.path.join(FLAGS.checkpoint_dir, model_dir)
     # load the latest checkpoints
     #for num in xrange(70, 71):
     #net_g_name = os.path.join(save_dir, 'net_g.npz')
@@ -126,8 +126,12 @@ def main(_):
 
     data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
-
-
+    ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+    if ckpt and ckpt.model_checkpoint_path:
+        saver.restore(sess, ckpt.model_checkpoint_path)
+        print("[*] Loading checkpoints...")
+    else:
+        print("[*] Loading checkpoints failed ...")
     sample_seed = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
     if FLAGS.is_train:
 
@@ -169,9 +173,7 @@ def main(_):
                 sys.stdout.flush()
 
                 iter_counter += 1
-            print("[*] Saving checkpoints...")
-            save_path = saver.save(sess, FLAGS.checkpoint_dir+'/model', global_step=200)
-            print("Model saved in path: %s" % save_path)
+
             if np.mod(epoch, 1) == 0:
                 # generate and visualize generated images
                 #img, errD, errG = sess.run([net_g2.outputs, d_loss, g_loss], feed_dict={z : sample_seed, real_images: sample_images})
@@ -193,7 +195,11 @@ def main(_):
                 #print D[-1], D_, sigmoid(D[-1]), sigmoid(D[-1])==D_
                 sys.stdout.flush()
 
-            #if np.mod(epoch, 5) == 0:
+            if np.mod(epoch, 5) == 0:
+                print("[*] Saving checkpoints...")
+                save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=5)
+                print("Model saved in path: %s" % save_path)
+
                 #print(epoch)
                 # save current network parameters
 
