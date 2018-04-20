@@ -170,14 +170,14 @@ def main(_):
 
                 iter_counter += 1
             print("[*] Saving checkpoints...")
-            save_path = saver.save(sess, FLAGS.checkpoint_dir+'/model', global_step=5)
+            save_path = saver.save(sess, FLAGS.checkpoint_dir+'/model', global_step=200)
             print("Model saved in path: %s" % save_path)
             if np.mod(epoch, 1) == 0:
                 # generate and visualize generated images
                 #img, errD, errG = sess.run([net_g2.outputs, d_loss, g_loss], feed_dict={z : sample_seed, real_images: sample_images})
-                img, errG = sess.run([net_g2.outputs, g_loss],
+                img, errG = sess.run([net_g2, g_loss],
                                      feed_dict={z : sample_seed, real_images: sample_images})
-                D, D_, errD = sess.run([net_d3.all_layers, net_d3.outputs, d_loss_real],
+                D, D_, errD = sess.run([net_d3, net_d3, d_loss_real],
                                        feed_dict={real_images: sample_images})
 
                 '''
