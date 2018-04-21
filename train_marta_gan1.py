@@ -58,9 +58,9 @@ def main(_):
                                                FLAGS.output_size, FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
-    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=None)
+    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=True)
     # generated fake images --> discriminator
-    net_d, d_logits, feature_fake = discriminator_simplified_api(net_g, is_train=True, reuse=None)
+    net_d, d_logits, feature_fake = discriminator_simplified_api(net_g, is_train=True, reuse=True)
     # real images --> discriminator
     net_d2, d2_logits, feature_real = discriminator_simplified_api(real_images, is_train=True, reuse=True)
     # sample_z --> generator for evaluation, set is_train to False
