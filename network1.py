@@ -22,7 +22,8 @@ def conditional_generator_simplified_api(inputs, condition, batch_size, is_train
 
 def batch_normalization_layer(layer, gamma_init, scope):
     #layer = tf.layers.batch_normalization(layer, epsilon=1e-12, gamma_initializer=gamma_init, name=scope)
-    return tf.nn.leaky_relu(layer, 0.2)
+    #return tf.nn.leaky_relu(layer, 0.2)
+    return layer
 
 def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
     image_size = 256
