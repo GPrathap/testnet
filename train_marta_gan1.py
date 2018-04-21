@@ -98,10 +98,10 @@ def main(_):
     d_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
     g_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
 
-    extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    with tf.control_dependencies(extra_update_ops):
-        d_optim = d_optimizer.minimize(d_loss)
-        g_optim = g_optimizer.minimize(g_loss)
+    #extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    #with tf.control_dependencies(extra_update_ops):
+    d_optim = d_optimizer.minimize(d_loss)
+    g_optim = g_optimizer.minimize(g_loss)
 
     saver = tf.train.Saver(max_to_keep=4)
 
