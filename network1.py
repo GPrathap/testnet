@@ -112,7 +112,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                           activation=None, name='d/h3/conv2d')
         net_h3 = batch_normalization_layer(net_h3, gamma_init, 'd/h3/batch_norm')
 
-        global_max1 = tf.layers.MaxPooling2D( net_h3, [4,4], strides=1, padding='SAME', name='d/h3/max_pool2d')
+        global_max1 = tf.layers.max_pooling2d( net_h3, [4,4], strides=1, padding='SAME', name='d/h3/max_pool2d')
         global_max1 = tf.layers.flatten(global_max1, name='d/h3/flatten')
 
         net_h4 = tf.layers.conv2d(net_h3, df_dim * 16, [k, k], strides=(2,2), padding='SAME',
@@ -120,7 +120,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                           activation=None, name='d/h4/conv2d')
         net_h4 = batch_normalization_layer(net_h4, gamma_init, 'd/h4/batch_norm')
 
-        global_max2 = tf.layers.MaxPooling2D(net_h4, [2, 2], strides=1, padding='SAME', name='d/h4/max_pool2d')
+        global_max2 = tf.layers.max_pooling2d(net_h4, [2, 2], strides=1, padding='SAME', name='d/h4/max_pool2d')
         global_max2 = tf.layers.flatten(global_max2, name='d/h4/flatten')
 
         net_h5 = tf.layers.conv2d(net_h4, df_dim * 32, [k, k], strides=(2,2), padding='SAME',
