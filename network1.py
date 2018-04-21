@@ -40,9 +40,8 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
 
     with tf.variable_scope("generator", reuse=reuse):
 
-        net_h0 = tf.contrib.layers.fully_connected( inputs, gf_dim * 32 * s64 * s64,
-            activation_fn=tf.identity, reuse=reuse,
-            trainable=is_train, scope='g/h0/fully_connected')
+        net_h0 = tf.layers.dense( inputs, gf_dim * 32 * s64 * s64,
+            activation=tf.identity, reuse=reuse, trainable=is_train, name='g/h0/fully_connected')
         net_h0 = tf.reshape(net_h0, shape=(-1, s64, s64, gf_dim*32))
         net_h0 = batch_normalization_layer(net_h0, gamma_init, 'g/h0/batch_norm')
 
@@ -134,8 +133,8 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
         global_max3 = tf.contrib.layers.flatten(net_h5, scope='d/h5/flatten')
         feature = tf.concat([global_max1, global_max2, global_max3], axis=1, name='d/h5/concat')
 
-        net_h6 = tf.contrib.layers.fully_connected(feature, 1, activation_fn=tf.identity, reuse=reuse,
-                                                   trainable=is_train, scope='d/h6/fully_connected')
+        net_h6 = tf.layers.dense(feature, 1, activation=tf.identity, reuse=reuse,
+                                                   trainable=is_train, name='d/h6/fully_connected')
         logits = net_h6
         net_h6 = tf.nn.sigmoid(net_h6)
     return net_h6, logits, feature
