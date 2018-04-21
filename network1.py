@@ -40,42 +40,42 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h0 = tf.reshape(net_h0, shape=(-1, s64, s64, gf_dim*32))
         net_h0 = tf.contrib.layers.batch_norm(net_h0, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                                scope='g/h0/batch_norm')
+                                              updates_collections=None,scope='g/h0/batch_norm')
 
         net_h1 = tf.contrib.layers.conv2d_transpose(
             net_h0, gf_dim*16, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
             reuse=reuse, trainable=is_train, scope='g/h1/conv2d_transpose')
         net_h1 = tf.contrib.layers.batch_norm(net_h1, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='g/h1/batch_norm')
+                                              updates_collections=None,scope='g/h1/batch_norm')
 
         net_h2 = tf.contrib.layers.conv2d_transpose(
             net_h1, gf_dim * 8, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
             reuse=reuse, trainable=is_train, scope='g/h2/conv2d_transpose')
         net_h2 = tf.contrib.layers.batch_norm(net_h2, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='g/h2/batch_norm')
+                                              updates_collections=None,scope='g/h2/batch_norm')
 
         net_h3 = tf.contrib.layers.conv2d_transpose(
             net_h2, gf_dim * 4, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
             reuse=reuse, trainable=is_train, scope='g/h3/conv2d_transpose')
         net_h3 = tf.contrib.layers.batch_norm(net_h3, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='g/h3/batch_norm')
+                                              updates_collections=None,scope='g/h3/batch_norm')
 
         net_h4 = tf.contrib.layers.conv2d_transpose(
             net_h3, gf_dim * 2, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
             reuse=reuse, trainable=is_train, scope='g/h4/conv2d_transpose')
         net_h4 = tf.contrib.layers.batch_norm(net_h4, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='g/h4/batch_norm')
+                                              updates_collections=None,scope='g/h4/batch_norm')
 
         net_h5 = tf.contrib.layers.conv2d_transpose(
             net_h4, gf_dim * 1, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
             reuse=reuse, trainable=is_train, scope='g/h5/conv2d_transpose')
         net_h5 = tf.contrib.layers.batch_norm(net_h5, activation_fn=tf.nn.relu, is_training=is_train,
                                               center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                              scope='g/h5/batch_norm')
+                                              updates_collections=None,scope='g/h5/batch_norm')
 
         net_h6 = tf.contrib.layers.conv2d_transpose(
             net_h5, 3, [k, k], stride=2, padding='SAME', activation_fn=None, weights_initializer=w_init,
@@ -109,21 +109,21 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                           activation_fn=None, scope='d/h1/conv2d')
         net_h1 = tf.contrib.layers.batch_norm(net_h1, activation_fn=lambda x: tf.nn.leaky_relu(x, 0.2),
                                               is_training=is_train, center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='d/h1/batch_norm')
+                                              updates_collections=None, scope='d/h1/batch_norm')
 
         net_h2 = tf.contrib.layers.conv2d(net_h1, df_dim * 4, [k, k], stride=2, padding='SAME',
                                           weights_initializer=w_init, reuse=reuse, trainable=is_train,
                                           activation_fn=None, scope='d/h2/conv2d')
         net_h2 = tf.contrib.layers.batch_norm(net_h2, activation_fn=lambda x: tf.nn.leaky_relu(x, 0.2),
                                               is_training=is_train, center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='d/h2/batch_norm')
+                                              updates_collections=None, scope='d/h2/batch_norm')
 
         net_h3 = tf.contrib.layers.conv2d(net_h2, df_dim * 8, [k, k], stride=2, padding='SAME',
                                           weights_initializer=w_init, reuse=reuse, trainable=is_train,
                                           activation_fn=None, scope='d/h3/conv2d')
         net_h3 = tf.contrib.layers.batch_norm(net_h3, activation_fn=lambda x: tf.nn.leaky_relu(x, 0.2),
                                               is_training=is_train, center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='d/h3/batch_norm')
+                                              updates_collections=None, scope='d/h3/batch_norm')
 
         global_max1 = tf.contrib.layers.max_pool2d( net_h3, [4,4], stride=1, padding='SAME',
                                                     outputs_collections=None, scope='d/h3/max_pool2d')
@@ -134,7 +134,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                           activation_fn=None, scope='d/h4/conv2d')
         net_h4 = tf.contrib.layers.batch_norm(net_h4, activation_fn=lambda x: tf.nn.leaky_relu(x, 0.2),
                                               is_training=is_train, center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                               scope='d/h4/batch_norm')
+                                              updates_collections=None, scope='d/h4/batch_norm')
 
         global_max2 = tf.contrib.layers.max_pool2d(net_h4, [2, 2], stride=1, padding='SAME',
                                                    outputs_collections=None, scope='d/h4/max_pool2d')
@@ -145,7 +145,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                           activation_fn=None, scope='d/h5/conv2d')
         net_h5 = tf.contrib.layers.batch_norm(net_h5, activation_fn=lambda x: tf.nn.leaky_relu(x, 0.2),
                                               is_training=is_train, center=True, scale=True, epsilon=1e-5, decay=0.999,
-                                              scope='d/h5/batch_norm')
+                                              updates_collections=None, scope='d/h5/batch_norm')
         global_max3 = tf.contrib.layers.flatten(net_h5, scope='d/h5/flatten')
         feature = tf.concat([global_max1, global_max2, global_max3], axis=1, name='d/h5/concat')
 
