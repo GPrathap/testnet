@@ -41,38 +41,38 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
     with tf.variable_scope("generator", reuse=reuse):
 
         net_h0 = tf.layers.dense( inputs, gf_dim * 32 * s64 * s64,
-            activation=tf.identity, reuse=reuse, trainable=is_train, name='g/h0/fully_connected')
+            activation=tf.identity, reuse=reuse, trainable=is_train, name='g/h0/dense')
         net_h0 = tf.reshape(net_h0, shape=(-1, s64, s64, gf_dim*32))
         net_h0 = batch_normalization_layer(net_h0, gamma_init, 'g/h0/batch_norm')
 
-        net_h1 = tf.contrib.layers.conv2d_transpose(
-            net_h0, gf_dim*16, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h1/conv2d_transpose')
+        net_h1 = tf.layers.conv2d_transpose(
+            net_h0, gf_dim*16, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h1/conv2d_transpose')
         net_h1 = batch_normalization_layer(net_h1, gamma_init, 'g/h1/batch_norm')
 
-        net_h2 = tf.contrib.layers.conv2d_transpose(
-            net_h1, gf_dim * 8, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h2/conv2d_transpose')
+        net_h2 = tf.layers.conv2d_transpose(
+            net_h1, gf_dim * 8, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h2/conv2d_transpose')
         net_h2 = batch_normalization_layer(net_h2, gamma_init, 'g/h2/batch_norm')
 
-        net_h3 = tf.contrib.layers.conv2d_transpose(
-            net_h2, gf_dim * 4, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h3/conv2d_transpose')
+        net_h3 = tf.layers.conv2d_transpose(
+            net_h2, gf_dim * 4, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h3/conv2d_transpose')
         net_h3 = batch_normalization_layer(net_h3, gamma_init, 'g/h3/batch_norm')
 
-        net_h4 = tf.contrib.layers.conv2d_transpose(
-            net_h3, gf_dim * 2, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h4/conv2d_transpose')
+        net_h4 = tf.layers.conv2d_transpose(
+            net_h3, gf_dim * 2, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h4/conv2d_transpose')
         net_h4 = batch_normalization_layer(net_h4, gamma_init, 'g/h4/batch_norm')
 
-        net_h5 = tf.contrib.layers.conv2d_transpose(
-            net_h4, gf_dim * 1, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h5/conv2d_transpose')
+        net_h5 = tf.layers.conv2d_transpose(
+            net_h4, gf_dim * 1, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h5/conv2d_transpose')
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'g/h5/batch_norm')
 
-        net_h6 = tf.contrib.layers.conv2d_transpose(
-            net_h5, 3, [k, k], stride=2, padding='SAME', activation_fn=None,
-            reuse=reuse, trainable=is_train, scope='g/h6/conv2d_transpose')
+        net_h6 = tf.layers.conv2d_transpose(
+            net_h5, 3, [k, k], strides=(2,2), padding='SAME', activation=None,
+            reuse=reuse, trainable=is_train, name='g/h6/conv2d_transpose')
 
         logits = net_h6
         net_h6 = tf.nn.tanh(net_h6)
@@ -93,48 +93,46 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
 
     with tf.variable_scope("discriminator", reuse=reuse):
 
-        net_h1 = tf.contrib.layers.conv2d(inputs, df_dim, [k, k], stride=2, padding='SAME',
+        net_h1 = tf.layers.conv2d(inputs, df_dim, [k, k], strides=(2,2), padding='SAME',
                                           reuse=reuse, trainable=is_train,
-                                          activation_fn= lambda x: tf.nn.leaky_relu(x, 0.2), scope='g/h0/conv2d')
+                                          activation= lambda x: tf.nn.leaky_relu(x, 0.2), name='g/h0/conv2d')
 
-        net_h1 = tf.contrib.layers.conv2d(net_h1, df_dim*2, [k, k], stride=2, padding='SAME',
+        net_h1 = tf.layers.conv2d(net_h1, df_dim*2, [k, k], strides=(2,2), padding='SAME',
                                            reuse=reuse, trainable=is_train,
-                                          activation_fn=None, scope='d/h1/conv2d')
+                                          activation=None, name='d/h1/conv2d')
         net_h1 = batch_normalization_layer(net_h1, gamma_init, 'd/h1/batch_norm')
 
-        net_h2 = tf.contrib.layers.conv2d(net_h1, df_dim * 4, [k, k], stride=2, padding='SAME',
+        net_h2 = tf.layers.conv2d(net_h1, df_dim * 4, [k, k], strides=(2,2), padding='SAME',
                                            reuse=reuse, trainable=is_train,
-                                          activation_fn=None, scope='d/h2/conv2d')
+                                          activation=None, name='d/h2/conv2d')
         net_h2 = batch_normalization_layer(net_h2, gamma_init, 'd/h2/batch_norm')
 
-        net_h3 = tf.contrib.layers.conv2d(net_h2, df_dim * 8, [k, k], stride=2, padding='SAME',
+        net_h3 = tf.layers.conv2d(net_h2, df_dim * 8, [k, k], strides=(2,2), padding='SAME',
                                           reuse=reuse, trainable=is_train,
-                                          activation_fn=None, scope='d/h3/conv2d')
+                                          activation=None, name='d/h3/conv2d')
         net_h3 = batch_normalization_layer(net_h3, gamma_init, 'd/h3/batch_norm')
 
-        global_max1 = tf.contrib.layers.max_pool2d( net_h3, [4,4], stride=1, padding='SAME',
-                                                    outputs_collections=None, scope='d/h3/max_pool2d')
-        global_max1 = tf.contrib.layers.flatten(global_max1, scope='d/h3/flatten')
+        global_max1 = tf.layers.MaxPooling2D( net_h3, [4,4], strides=(1,1), padding='SAME', name='d/h3/max_pool2d')
+        global_max1 = tf.layers.flatten(global_max1, name='d/h3/flatten')
 
-        net_h4 = tf.contrib.layers.conv2d(net_h3, df_dim * 16, [k, k], stride=2, padding='SAME',
+        net_h4 = tf.layers.conv2d(net_h3, df_dim * 16, [k, k], strides=(2,2), padding='SAME',
                                            reuse=reuse, trainable=is_train,
-                                          activation_fn=None, scope='d/h4/conv2d')
+                                          activation=None, name='d/h4/conv2d')
         net_h4 = batch_normalization_layer(net_h4, gamma_init, 'd/h4/batch_norm')
 
-        global_max2 = tf.contrib.layers.max_pool2d(net_h4, [2, 2], stride=1, padding='SAME',
-                                                   outputs_collections=None, scope='d/h4/max_pool2d')
-        global_max2 = tf.contrib.layers.flatten(global_max2, scope='d/h4/flatten')
+        global_max2 = tf.layers.MaxPooling2D(net_h4, [2, 2], strides=(1,1), padding='SAME', name='d/h4/max_pool2d')
+        global_max2 = tf.layers.flatten(global_max2, name='d/h4/flatten')
 
-        net_h5 = tf.contrib.layers.conv2d(net_h4, df_dim * 32, [k, k], stride=2, padding='SAME',
+        net_h5 = tf.layers.conv2d(net_h4, df_dim * 32, [k, k], strides=(2,2), padding='SAME',
                                            reuse=reuse, trainable=is_train,
-                                          activation_fn=None, scope='d/h5/conv2d')
+                                          activation=None, name='d/h5/conv2d')
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'd/h5/batch_norm')
 
-        global_max3 = tf.contrib.layers.flatten(net_h5, scope='d/h5/flatten')
+        global_max3 = tf.layers.flatten(net_h5, name='d/h5/flatten')
         feature = tf.concat([global_max1, global_max2, global_max3], axis=1, name='d/h5/concat')
 
         net_h6 = tf.layers.dense(feature, 1, activation=tf.identity, reuse=reuse,
-                                                   trainable=is_train, name='d/h6/fully_connected')
+                                                   trainable=is_train, name='d/h6/dense')
         logits = net_h6
         net_h6 = tf.nn.sigmoid(net_h6)
     return net_h6, logits, feature
