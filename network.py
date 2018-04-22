@@ -37,13 +37,24 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         tl.layers.set_name_reuse(reuse)
 
         net_in = InputLayer(inputs, name='g/in')
-        net_h0 = DenseLayer(net_in, n_units=gf_dim*64*s64*s64, W_init=w_init,
-                act = tf.identity, name='g/h0/lin')
-        net_h0 = ReshapeLayer(net_h0, (-1, s64, s64, gf_dim*64), name='g/h0/reshape')
-        net_h0 = BatchNormLayer(net_h0, act=tf.nn.relu, is_train=is_train,
-                gamma_init=gamma_init, name='g/h0/batch_norm')
 
-        net_h1 = DeConv2d(net_h0, gf_dim*32, (k, k), out_size=(s32, s32), strides=(2, 2),
+        net_h00 = DenseLayer(net_in, n_units=gf_dim * 256 * s64 * s64, W_init=w_init,
+                            act=tf.identity, name='g/h00/lin')
+        net_h00 = ReshapeLayer(net_h00, (-1, s64, s64, gf_dim * 256), name='g/h00/reshape')
+        net_h00 = BatchNormLayer(net_h00, act=tf.nn.relu, is_train=is_train,
+                                gamma_init=gamma_init, name='g/h00/batch_norm')
+
+        net_h10 = DeConv2d(net_h00, gf_dim * 128, (k, k), out_size=(s32, s32), strides=(2, 2),
+                          padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/net_h10/decon2d')
+        net_h10 = BatchNormLayer(net_h10, act=tf.nn.relu, is_train=is_train,
+                                gamma_init=gamma_init, name='g/net_h10/batch_norm')
+
+        net_h11 = DeConv2d(net_h10, gf_dim * 64, (k, k), out_size=(s32, s32), strides=(2, 2),
+                          padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/net_h11/decon2d')
+        net_h11 = BatchNormLayer(net_h11, act=tf.nn.relu, is_train=is_train,
+                                gamma_init=gamma_init, name='g/net_h11/batch_norm')
+
+        net_h1 = DeConv2d(net_h11, gf_dim*32, (k, k), out_size=(s32, s32), strides=(2, 2),
                 padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/h1/decon2d')
         net_h1 = BatchNormLayer(net_h1, act=tf.nn.relu, is_train=is_train,
                 gamma_init=gamma_init, name='g/h1/batch_norm')
@@ -63,17 +74,17 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h4 = BatchNormLayer(net_h4, act=tf.nn.relu, is_train=is_train,
                 gamma_init=gamma_init, name='g/h4/batch_norm')
 
-        net_h5 = DeConv2d(net_h4, gf_dim*2, (k, k), out_size=(s2, s2), strides=(2, 2),
+        net_h5 = DeConv2d(net_h4, gf_dim*2, (k, k), out_size=(s2, s2), strides=(1, 1),
                 padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/h5/decon2d')
         net_h5 = BatchNormLayer(net_h5, act=tf.nn.relu, is_train=is_train,
                 gamma_init=gamma_init, name='g/h5/batch_norm')
 
-        net_h6 = DeConv2d(net_h5, gf_dim * 1, (k, k), out_size=(s2, s2), strides=(2, 2),
+        net_h6 = DeConv2d(net_h5, gf_dim * 1, (k, k), out_size=(s2, s2), strides=(1, 1),
                           padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/h6/decon2d')
         net_h6 = BatchNormLayer(net_h6, act=tf.nn.relu, is_train=is_train,
                                 gamma_init=gamma_init, name='g/h6/batch_norm')
 
-        net_h7 = DeConv2d(net_h6, 3, (k, k), out_size=(image_size, image_size), strides=(2, 2),
+        net_h7 = DeConv2d(net_h6, 3, (k, k), out_size=(image_size, image_size), strides=(1, 1),
                 padding='SAME', batch_size=batch_size, act=None, W_init=w_init, name='g/h7/decon2d')
         logits = net_h7.outputs
         net_h7.outputs = tf.nn.tanh(net_h7.outputs)
@@ -135,11 +146,22 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
         net_h6 = BatchNormLayer(net_h6, act=lambda x: tl.act.lrelu(x, 0.2),
                                 is_train=is_train, gamma_init=gamma_init, name='d/h6/batch_norm')
 
-        global_max3 = FlattenLayer(net_h6, name='d/h5/flatten')
-        
+        net_h7 = Conv2d(net_h6, df_dim * 128, (k, k), (2, 2), act=None,
+                        padding='SAME', W_init=w_init, name='d/h7/conv2d')
+        net_h7 = BatchNormLayer(net_h7, act=lambda x: tl.act.lrelu(x, 0.2),
+                                is_train=is_train, gamma_init=gamma_init, name='d/h7/batch_norm')
+
+        net_h8 = Conv2d(net_h7, df_dim * 256, (k, k), (2, 2), act=None,
+                        padding='SAME', W_init=w_init, name='d/h8/conv2d')
+        net_h8 = BatchNormLayer(net_h8, act=lambda x: tl.act.lrelu(x, 0.2),
+                                is_train=is_train, gamma_init=gamma_init, name='d/h8/batch_norm')
+
+        global_max3 = FlattenLayer(net_h8, name='d/h8/flatten')
         feature = ConcatLayer(layers = [global_max3], name ='d/concat_layer1')
-        net_h7 = DenseLayer(feature, n_units=1, act=tf.identity,
-                W_init = w_init, name='d/h6/lin_sigmoid')
-        logits = net_h7.outputs
-        net_h7.outputs = tf.nn.sigmoid(net_h7.outputs)
-    return net_h7, logits, feature.outputs
+
+
+        net_h9 = DenseLayer(feature, n_units=1, act=tf.identity,
+                W_init = w_init, name='d/h9/lin_sigmoid')
+        logits = net_h9.outputs
+        net_h9.outputs = tf.nn.sigmoid(net_h9.outputs)
+    return net_h9, logits, feature.outputs
