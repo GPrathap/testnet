@@ -34,7 +34,7 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint7", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint10", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_string("sample_dir", "/data/samples2", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
@@ -62,14 +62,14 @@ def main(_):
                                                FLAGS.output_size, FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
-    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=False)
+    net_g, g_logits = generator_simplified_api(z, is_train=True, reuse=False)
     # generated fake images --> discriminator
     net_d, d_logits, feature_fake = discriminator_simplified_api(net_g.outputs, is_train=True, reuse=False)
     # real images --> discriminator
     net_d2, d2_logits, feature_real = discriminator_simplified_api(real_images, is_train=True, reuse=True)
     # sample_z --> generator for evaluation, set is_train to False
     # so that BatchNormLayer behave differently
-    net_g2, g2_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=False, reuse=True)
+    net_g2, g2_logits = generator_simplified_api(z, is_train=False, reuse=True)
 
     #
     net_d3, d3_logits, _ = discriminator_simplified_api(real_images, is_train=False, reuse=True)
