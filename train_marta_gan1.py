@@ -6,6 +6,7 @@ import numpy as np
 import time
 import tensorflow as tf
 import tensorlayer as tl
+from tensorflow.contrib import slim
 from tensorlayer.layers import *
 from glob import glob
 from random import shuffle
@@ -97,11 +98,12 @@ def main(_):
     g_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
 
     extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    training_update_ops = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-    with tf.control_dependencies(training_update_ops):
-        with tf.control_dependencies(extra_update_ops):
-            d_optim = d_optimizer.minimize(d_loss)
-            g_optim = g_optimizer.minimize(g_loss)
+    #training_update_ops = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+    with tf.control_dependencies(extra_update_ops):
+        g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0:14]
+        d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[14:-1]
+        d_optim = d_optimizer.minimize(d_loss, var_list=d_vars)
+        g_optim = g_optimizer.minimize(g_loss, var_list=g_vars)
 
     saver = tf.train.Saver(max_to_keep=4)
 
@@ -109,7 +111,10 @@ def main(_):
         #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
         sess.run(tf.global_variables_initializer())
 
+        variables_to_restore = slim.get_model_variables()
+        variables = tf.get_collection(tf.GraphKeys.VARIABLES)
         variables_names = [v.name for v in tf.trainable_variables()]
+        #[v.name for v in tf.trainable_variables("generator/*")]
         values = sess.run(variables_names)
         for k, v in zip(variables_names, values):
             print ("Variable: ", k)
