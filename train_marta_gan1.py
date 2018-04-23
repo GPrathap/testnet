@@ -81,7 +81,7 @@ def main(_):
     g_loss1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits,
                                                                      labels=tf.ones_like(d_logits)))
     g_loss2 = tf.reduce_mean(tf.nn.l2_loss(feature_real-feature_fake))/(FLAGS.image_size*FLAGS.image_size)
-    g_loss = g_loss1+g_loss2
+    g_loss = g_loss1 + g_loss2
     # g_loss = tf.reduce_mean(tf.abs(feature_real-feature_fake))
     # trainable parameters for updating discriminator and generator
     #g_vars = net_g.all_params   # only updates the generator
@@ -91,7 +91,10 @@ def main(_):
     print("---------------")
     #net_d.print_params(False)
 
-
+    global_step = tf.Variable(0, trainable=False)
+    starter_learning_rate = 0.1
+    learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
+                                               1000, FLAGS.learning_rate, staircase=True)
 
     # optimizers for updating discriminator and generator
     d_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
