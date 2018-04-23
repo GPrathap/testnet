@@ -66,8 +66,6 @@ def main(_):
     # sample_z --> generator for evaluation, set is_train to False
     # so that BatchNormLayer behave differently
     net_g2, g2_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=False, reuse=True)
-
-    #
     net_d3, d3_logits, _ = discriminator_simplified_api(real_images, is_train=False, reuse=True)
 
     # cost for updating discriminator and generator
@@ -98,80 +96,88 @@ def main(_):
     d_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
     g_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
 
-    #extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    #with tf.control_dependencies(extra_update_ops):
-    d_optim = d_optimizer.minimize(d_loss)
-    g_optim = g_optimizer.minimize(g_loss)
+    extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    training_update_ops = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+    with tf.control_dependencies(training_update_ops):
+        with tf.control_dependencies(extra_update_ops):
+            d_optim = d_optimizer.minimize(d_loss)
+            g_optim = g_optimizer.minimize(g_loss)
 
     saver = tf.train.Saver(max_to_keep=4)
 
-    sess=tf.Session()
-    #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
-    sess.run(tf.global_variables_initializer())
+    with tf.Session() as sess:
+        #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
+        sess.run(tf.global_variables_initializer())
 
-    data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
+        variables_names = [v.name for v in tf.trainable_variables()]
+        values = sess.run(variables_names)
+        for k, v in zip(variables_names, values):
+            print ("Variable: ", k)
+            print ("Shape: ", v.shape)
 
-    ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print("[*] Loading checkpoints...")
-    else:
-        print("[*] Loading checkpoints failed ...")
-    sample_seed = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
-    if FLAGS.is_train:
+        data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
-        iter_counter = 0
-        for epoch in range(FLAGS.epoch):
-            #shuffle data
-            shuffle(data_files)
-            print("[*]Data set shuffled!")
+        ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+            print("[*] Loading checkpoints ...")
+        else:
+            print("[*] Loading checkpoints failed ...")
+        sample_seed = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+        if FLAGS.is_train:
 
-            # update sample files based on shuffled data
-            sample_files = data_files[0:FLAGS.batch_size]
-            sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
-                                is_grayscale = 0) for sample_file in sample_files]
-            sample_images = np.array(sample).astype(np.float32)
-            print(sample_images.shape)
-            print("[*]Sample images updated!")
+            iter_counter = 0
+            for epoch in range(FLAGS.epoch):
+                #shuffle data
+                shuffle(data_files)
+                print("[*]Data set shuffled!")
 
-            # load image data
-            batch_idxs = min(len(data_files), FLAGS.train_size) // FLAGS.batch_size
+                # update sample files based on shuffled data
+                sample_files = data_files[0:FLAGS.batch_size]
+                sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
+                                    is_grayscale = 0) for sample_file in sample_files]
+                sample_images = np.array(sample).astype(np.float32)
+                print(sample_images.shape)
+                print("[*]Sample images updated!")
 
-            for idx in range(batch_idxs):
-                batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
-                batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
-                                   resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
-                batch_images = np.array(batch).astype(np.float32)
-                batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                # load image data
+                batch_idxs = min(len(data_files), FLAGS.train_size) // FLAGS.batch_size
 
-                start_time = time.time()
+                for idx in range(batch_idxs):
+                    batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
+                    batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
+                                       resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
+                    batch_images = np.array(batch).astype(np.float32)
+                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
 
-                errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
-                for _ in range(2):
-                    errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
-                print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
-                        % (epoch, FLAGS.epoch, idx, batch_idxs,
-                            time.time() - start_time, errD, errG))
-                sys.stdout.flush()
+                    start_time = time.time()
 
-                iter_counter += 1
+                    errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
+                    for _ in range(2):
+                        errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
+                    print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
+                            % (epoch, FLAGS.epoch, idx, batch_idxs,
+                                time.time() - start_time, errD, errG))
+                    sys.stdout.flush()
 
-            if np.mod(epoch, 1) == 0:
-                img, errG = sess.run([net_g2, g_loss],
-                                     feed_dict={z : sample_seed, real_images: sample_images})
-                D, D_, errD = sess.run([net_d3, net_d3, d_loss_real],
-                                       feed_dict={real_images: sample_images})
+                    iter_counter += 1
 
-                save_images(img, [8, 8],
-                            '{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
-                print("[Sample] d_loss: %.8f, g_loss: %.8f" % (errD, errG))
-                sys.stdout.flush()
+                if np.mod(epoch, 1) == 0:
+                    img, errG = sess.run([net_g2, g_loss],
+                                         feed_dict={z : sample_seed, real_images: sample_images})
+                    D, D_, errD = sess.run([net_d3, net_d3, d_loss_real],
+                                           feed_dict={real_images: sample_images})
 
-            if np.mod(epoch, 5) == 0:
-                print("[*] Saving checkpoints...")
-                save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=5)
-                print("Model saved in path: %s" % save_path)
-                print("[*] Saving checkpoints SUCCESS!")
+                    save_images(img, [8, 8],
+                                '{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
+                    print("[Sample] d_loss: %.8f, g_loss: %.8f" % (errD, errG))
+                    sys.stdout.flush()
+
+                if np.mod(epoch, 5) == 0:
+                    print("[*] Saving checkpoints...")
+                    save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=5)
+                    print("Model saved in path: %s" % save_path)
+                    print("[*] Saving checkpoints SUCCESS!")
 
 
 
