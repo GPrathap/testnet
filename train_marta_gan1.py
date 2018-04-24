@@ -13,7 +13,7 @@ from random import shuffle
 
 from grid_layout import create_mine_grid
 from utils import *
-from network1 import *
+from network3 import *
 pp = pprint.PrettyPrinter()
 
 """
@@ -72,24 +72,18 @@ def main(_):
     # cost for updating discriminator and generator
     # discriminator: real images are labelled as 1
     d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d2_logits,
-                                                                         labels=tf.ones_like(d2_logits)))    # real == 1
+                                                                         labels=tf.ones_like(d2_logits)))
+    # real == 1
     # discriminator: images from generator (fake) are labelled as 0
     d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits,
-                                                                         labels=tf.zeros_like(d_logits)))     # fake == 0
+                                                                         labels=tf.zeros_like(d_logits)))
+    # fake == 0
     d_loss = d_loss_real + d_loss_fake
     # generator: try to make the the fake images look real (1)
     g_loss1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits,
                                                                      labels=tf.ones_like(d_logits)))
     g_loss2 = tf.reduce_mean(tf.nn.l2_loss(feature_real-feature_fake))/(FLAGS.image_size*FLAGS.image_size)
     g_loss = g_loss1 + g_loss2
-    # g_loss = tf.reduce_mean(tf.abs(feature_real-feature_fake))
-    # trainable parameters for updating discriminator and generator
-    #g_vars = net_g.all_params   # only updates the generator
-    #d_vars = net_d.all_params   # only updates the discriminator
-
-    #net_g.print_params(False)
-    print("---------------")
-    #net_d.print_params(False)
 
     global_step = tf.Variable(0, trainable=False)
     starter_learning_rate = 0.1
@@ -101,7 +95,6 @@ def main(_):
     g_optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate, beta1=FLAGS.beta1)
 
     extra_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    #training_update_ops = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
     with tf.control_dependencies(extra_update_ops):
         g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="generator/*")
         d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="discriminator/*")
@@ -111,15 +104,14 @@ def main(_):
     saver = tf.train.Saver(max_to_keep=4)
 
     with tf.Session() as sess:
-        #tl.ops.set_gpu_fraction(sess=sess, gpu_fraction=0.88)
         sess.run(tf.global_variables_initializer())
 
         variables_names = [v.name for v in tf.trainable_variables()]
-        #[v.name for v in tf.trainable_variables("generator/*")]
+
         values = sess.run(variables_names)
         for k, v in zip(variables_names, values):
-            print ("Variable: ", k)
-            print ("Shape: ", v.shape)
+            print("Variable: ", k)
+            print("Shape: ", v.shape)
 
         data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
