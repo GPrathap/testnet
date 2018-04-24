@@ -99,14 +99,14 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
 
     with tf.variable_scope("discriminator", reuse=reuse):
 
-        net_h1 = tf.layers.conv2d(inputs, df_dim, [k, k], strides=(2,2), padding='SAME',
+        net_h10 = tf.layers.conv2d(inputs, df_dim, [k, k], strides=(1,1), padding='SAME',
                                           activation= lambda x: tf.nn.leaky_relu(x, 0.2))
 
-        net_h1 = tf.layers.conv2d(net_h1, df_dim*2, [k, k], strides=(2,2), padding='SAME',
+        net_h10 = tf.layers.conv2d(net_h10, df_dim*2, [k, k], strides=(1,1), padding='SAME',
                                           activation=None)
-        net_h1 = batch_normalization_layer(net_h1, gamma_init, is_train)
+        net_h1 = batch_normalization_layer(net_h10, gamma_init, is_train)
 
-        net_h2 = tf.layers.conv2d(net_h1, df_dim * 4, [k, k], strides=(2,2), padding='SAME',
+        net_h2 = tf.layers.conv2d(net_h1, df_dim * 4, [k, k], strides=(1,1), padding='SAME',
                                           activation=None)
         net_h2 = batch_normalization_layer(net_h2, gamma_init, is_train)
 
@@ -134,12 +134,21 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
                                   activation=None)
         net_h8 = batch_normalization_layer(net_h8, gamma_init, is_train)
 
-        global_max3 = tf.layers.flatten(net_h8)
-        global_max2 = tf.layers.flatten(net_h7)
-        global_max1 = tf.layers.flatten(net_h6)
+        net_h9 = tf.layers.conv2d(net_h8, df_dim * 256, [k, k], strides=(2, 2), padding='SAME',
+                                  activation=None)
+        net_h9 = batch_normalization_layer(net_h9, gamma_init, is_train)
+
+        net_h10 = tf.layers.conv2d(net_h9, df_dim * 256, [k, k], strides=(2, 2), padding='SAME',
+                                  activation=None)
+        net_h10 = batch_normalization_layer(net_h10, gamma_init, is_train)
+
+        global_max1 = tf.layers.flatten(net_h8)
+        global_max2 = tf.layers.flatten(net_h9)
+        global_max3 = tf.layers.flatten(net_h10)
+
         feature = tf.concat([global_max1, global_max2, global_max3], axis=1)
 
-        net_h9 = tf.layers.dense(feature, 1, activation=tf.identity)
-        logits = net_h9
-        net_h9 = tf.nn.sigmoid(net_h9)
-    return net_h9, logits, feature
+        net_h10 = tf.layers.dense(feature, 1, activation=tf.identity)
+        logits = net_h10
+        net_h10 = tf.nn.sigmoid(net_h10)
+    return net_h10, logits, feature

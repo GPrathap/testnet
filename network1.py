@@ -53,22 +53,22 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
                                            , is_train, is_train, reuse=reuse)
 
         net_h2 = tf.layers.conv2d_transpose(
-            net_h1, gf_dim * 8, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h1, gf_dim*8, [k, k], strides=(2,2), padding='SAME', activation=None)
         net_h2 = batch_normalization_layer(net_h2, gamma_init, 'g/h2/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
         net_h3 = tf.layers.conv2d_transpose(
-            net_h2, gf_dim * 4, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h2, gf_dim*4, [k, k], strides=(2,2), padding='SAME', activation=None)
         net_h3 = batch_normalization_layer(net_h3, gamma_init, 'g/h3/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
         net_h4 = tf.layers.conv2d_transpose(
-            net_h3, gf_dim * 2, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h3, gf_dim*2, [k, k], strides=(2,2), padding='SAME', activation=None)
         net_h4 = batch_normalization_layer(net_h4, gamma_init, 'g/h4/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
         net_h5 = tf.layers.conv2d_transpose(
-            net_h4, gf_dim * 1, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h4, gf_dim*1, [k, k], strides=(2,2), padding='SAME', activation=None)
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'g/h5/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
