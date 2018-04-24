@@ -13,7 +13,7 @@ from random import shuffle
 
 from grid_layout import create_mine_grid
 from utils import *
-from network1 import *
+from network3 import *
 pp = pprint.PrettyPrinter()
 
 """
