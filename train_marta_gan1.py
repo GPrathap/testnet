@@ -13,7 +13,7 @@ from random import shuffle
 
 from grid_layout import create_mine_grid
 from utils import *
-from network3 import *
+from network1 import *
 pp = pprint.PrettyPrinter()
 
 """
@@ -28,15 +28,15 @@ flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]"
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", 30000, "The size of train images [np.inf]")
 flags.DEFINE_integer("batch_size", 64, "The number of batch images [64]")
-flags.DEFINE_integer("image_size", 256, "The size of image to use (will be center cropped) [108]")
-flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
+flags.DEFINE_integer("image_size", 128, "The size of image to use (will be center cropped) [108]")
+flags.DEFINE_integer("output_size", 128, "The size of the output images to produce [64]")
 flags.DEFINE_integer("sample_size", 64, "The number of sample images [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint14", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "/data/samples14", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint15", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples15", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
