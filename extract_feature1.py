@@ -26,8 +26,8 @@ flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]"
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", 40000, "The size of train images [np.inf]")
 flags.DEFINE_integer("batch_size", 1, "The number of batch images [64]")
-flags.DEFINE_integer("image_size", 256, "The size of image to use (will be center cropped) [108]")
-flags.DEFINE_integer("output_size", 256, "The size of the output images to produce [64]")
+flags.DEFINE_integer("image_size", 64, "The size of image to use (will be center cropped) [108]")
+flags.DEFINE_integer("output_size", 64, "The size of the output images to produce [64]")
 flags.DEFINE_integer("sample_size", 64, "The number of sample images [64]")
 flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
@@ -53,10 +53,12 @@ def main(_):
 
 
     #with tf.device("/gpu:0"): # <-- if you have a GPU machine
-    real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size, FLAGS.c_dim], name='real_images')
+    real_images =  tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size, FLAGS.output_size,
+                                               FLAGS.c_dim], name='real_images')
 
     # z --> generator for training
-    net_d, d_logits, features = discriminator_simplified_api(real_images, is_train=FLAGS.is_train, reuse=False)
+    net_d, d_logits, features = discriminator_simplified_api(real_images, is_train=FLAGS.is_train,
+                                                             reuse=False)
 
     saver = tf.train.Saver()
     sess=tf.Session()
@@ -106,7 +108,8 @@ def main(_):
         for idx in range(batch_idxs):
             batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
             # get real images
-            batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
+            batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
+                               is_grayscale = 0) for batch_file in batch_files]
             batch_images = np.array(batch).astype(np.float32)
             # update sample files based on shuffled data
             #img, errG = sess.run([net_g2.outputs, g_loss], feed_dict={z : sample_seed})
@@ -145,7 +148,8 @@ def main(_):
         for idx in range(batch_idxs):
             batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
 
-            batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
+            batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
+                               is_grayscale = 0) for batch_file in batch_files]
             batch_images = np.array(batch).astype(np.float32)
             # update sample files based on shuffled data
             #img, errG = sess.run([net_g2.outputs, g_loss], feed_dict={z : sample_seed})

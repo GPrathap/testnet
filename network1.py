@@ -69,7 +69,7 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
                                            , is_train, is_train, reuse=reuse)
 
         net_h5 = tf.layers.conv2d_transpose(
-            net_h4, gf_dim*1, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h4, gf_dim*1, [k, k], strides=(1, 1), padding='SAME', activation=None)
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'g/h5/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
