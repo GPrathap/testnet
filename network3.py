@@ -1,12 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 30 20:52:00 2017
-
-@author: ldy
-"""
-
-
 import numpy as np
 
 import tensorflow as tf
