@@ -260,6 +260,8 @@ def inception_v4(inputs, num_classes=1001,
                         is_training=is_training):
       net, end_points = inception_v4_base(inputs, scope=scope)
 
+      final_feature_set = []
+
       with slim.arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d],
                           stride=1, padding='SAME'):
         # Auxiliary Head logits
@@ -270,16 +272,20 @@ def inception_v4(inputs, num_classes=1001,
             aux_logits = slim.avg_pool2d(aux_logits, [5, 5], stride=3,
                                          padding='VALID',
                                          scope='AvgPool_1a_5x5')
+            feature_point1 = slim.flatten(aux_logits)
             aux_logits = slim.conv2d(aux_logits, 128, [1, 1],
                                      scope='Conv2d_1b_1x1')
+            feature_point2 = slim.flatten(aux_logits)
             aux_logits = slim.conv2d(aux_logits, 768,
                                      aux_logits.get_shape()[1:3],
                                      padding='VALID', scope='Conv2d_2a')
             aux_logits = slim.flatten(aux_logits)
+            feature_point3 = slim.flatten(aux_logits)
             aux_logits = slim.fully_connected(aux_logits, num_classes,
                                               activation_fn=None,
                                               scope='Aux_logits')
             end_points['AuxLogits'] = aux_logits
+            final_feature_set = tf.concat([feature_point1, feature_point2, feature_point3], 1)
 
         # Final pooling and prediction
         # TODO(sguada,arnoegw): Consider adding a parameter global_pool which
@@ -288,11 +294,9 @@ def inception_v4(inputs, num_classes=1001,
           # 8 x 8 x 1536
           kernel_size = net.get_shape()[1:3]
           if kernel_size.is_fully_defined():
-            net = slim.avg_pool2d(net, kernel_size, padding='VALID',
-                                  scope='AvgPool_1a')
+            net = slim.avg_pool2d(net, kernel_size, padding='VALID', scope='AvgPool_1a')
           else:
-            net = tf.reduce_mean(net, [1, 2], keep_dims=True,
-                                 name='global_pool')
+            net = tf.reduce_mean(net, [1, 2], keep_dims=True, name='global_pool')
           end_points['global_pool'] = net
           if not num_classes:
             return net, end_points
@@ -305,7 +309,7 @@ def inception_v4(inputs, num_classes=1001,
                                         scope='Logits')
           end_points['Logits'] = logits
           end_points['Predictions'] = tf.nn.softmax(logits, name='Predictions')
-    return logits,  end_points['Predictions'], net, end_points
+    return logits,  final_feature_set, net, end_points
 inception_v4.default_image_size = 299
 
 
