@@ -285,7 +285,7 @@ def inception_v4(inputs, num_classes=1001,
                                               activation_fn=None,
                                               scope='Aux_logits')
             end_points['AuxLogits'] = aux_logits
-            final_feature_set = tf.concat([feature_point1, feature_point2, feature_point3], 1)
+
 
         # Final pooling and prediction
         # TODO(sguada,arnoegw): Consider adding a parameter global_pool which
@@ -298,15 +298,19 @@ def inception_v4(inputs, num_classes=1001,
           else:
             net = tf.reduce_mean(net, [1, 2], keep_dims=True, name='global_pool')
           end_points['global_pool'] = net
+          feature_point1 = slim.flatten(net)
           if not num_classes:
             return net, end_points
           # 1 x 1 x 1536
-          net = slim.dropout(net, dropout_keep_prob, scope='Dropout_1b')
+          #net = slim.dropout(net, dropout_keep_prob, scope='Dropout_1b')
           net = slim.flatten(net, scope='PreLogitsFlatten')
+          feature_point2 = slim.flatten(net)
           end_points['PreLogitsFlatten'] = net
           # 1536
           logits = slim.fully_connected(net, num_classes, activation_fn=None,
                                         scope='Logits')
+          feature_point3 = slim.flatten(logits)
+          final_feature_set = tf.concat([feature_point1, feature_point2, feature_point3], 1)
           end_points['Logits'] = logits
           end_points['Predictions'] = tf.nn.softmax(logits, name='Predictions')
     return logits,  final_feature_set, net, end_points

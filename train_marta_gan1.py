@@ -125,7 +125,7 @@ def main(_):
 
             iter_counter = 0
             for epoch in range(FLAGS.epoch):
-                #shuffle data
+
                 shuffle(data_files)
                 print("[*]Data set shuffled!")
 
