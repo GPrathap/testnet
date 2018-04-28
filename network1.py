@@ -27,7 +27,7 @@ def batch_normalization_layer(layer, gamma_init, scope, is_training, is_trainabl
     #return layer
 
 def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
-    image_size = 256
+    image_size = 64
     k = 4
     # 128, 64, 32, 16
     s2, s4, s8, s16, s32, s64 = int(image_size/2), int(image_size/4), int(image_size/8),\
@@ -68,11 +68,11 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
                                            , is_train, is_train, reuse=reuse)
 
         net_h5 = tf.layers.conv2d_transpose(
-            net_h4, gf_dim*1, [k, k], strides=(2,2), padding='SAME', activation=None)
+            net_h4, gf_dim*1, [k, k], strides=(2, 2), padding='SAME', activation=None)
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'g/h5/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
-        net_h6 = tf.layers.conv2d_transpose(net_h5, 3, [k, k], strides=(2,2), padding='SAME',
+        net_h6 = tf.layers.conv2d_transpose(net_h5, 3, [k, k], strides=(2, 2), padding='SAME',
                                             activation=None)
 
         logits = net_h6

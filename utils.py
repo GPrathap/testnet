@@ -43,7 +43,7 @@ def imread(path, is_grayscale = False):
         return scipy.misc.imread(path, flatten = True).astype(np.float)
     else:
         image = scipy.misc.imread(path).astype(np.float)
-        #image = scipy.misc.imresize(image, (64,64))
+        image = scipy.misc.imresize(image, (64,64))
         return image
 
 def imsave(images, size, path):
