@@ -131,7 +131,8 @@ def main(_):
 
                 # update sample files based on shuffled data
                 sample_files = data_files[0:FLAGS.batch_size]
-                sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop, resize_w=FLAGS.output_size,
+                sample = [get_image(sample_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
+                                    resize_w=FLAGS.output_size,
                                     is_grayscale = 0) for sample_file in sample_files]
                 sample_images = np.array(sample).astype(np.float32)
                 print(sample_images.shape)

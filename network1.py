@@ -91,20 +91,24 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
 
     with tf.variable_scope("discriminator", reuse=reuse):
 
-        net_h0 = tf.layers.conv2d(inputs, df_dim, [k, k], strides=(2,2), padding='SAME',
-                                          activation= lambda x: tf.nn.leaky_relu(x, 0.2))
+        net_h01 = tf.layers.conv2d(inputs, df_dim, [1, 1], strides=(2,2), padding='SAME')
+        net_h02 = tf.layers.conv2d(inputs, df_dim, [3, 3], strides=(2,2), padding='SAME')
+        net_h03 = tf.layers.conv2d(inputs, df_dim, [5, 5], strides=(2,2), padding='SAME')
 
-        net_h11 = tf.layers.conv2d(net_h0, df_dim*2, [1, 1], strides=(2,2), padding='SAME',
+        net_h0 = tf.concat(axis=3, values=[net_h01, net_h02, net_h03])
+
+
+        net_h11 = tf.layers.conv2d(net_h0, net_h0.shape[3]*2, [1, 1], strides=(2,2), padding='SAME',
                                           activation=None)
         net_h11 = batch_normalization_layer(net_h11, gamma_init, 'd/h1/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
-        net_h12 = tf.layers.conv2d(net_h0, df_dim * 2, [3, 3], strides=(2, 2), padding='SAME',
+        net_h12 = tf.layers.conv2d(net_h0, net_h0.shape[3]*2, [3, 3], strides=(2, 2), padding='SAME',
                                   activation=None)
         net_h12 = batch_normalization_layer(net_h12, gamma_init, 'd/h1/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
-        net_h13 = tf.layers.conv2d(net_h0, df_dim * 2, [5, 5], strides=(2, 2), padding='SAME',
+        net_h13 = tf.layers.conv2d(net_h0, net_h0.shape[3]*2, [5, 5], strides=(2, 2), padding='SAME',
                                   activation=None)
         net_h13 = batch_normalization_layer(net_h13, gamma_init, 'd/h1/batch_norm'
                                            , is_train, is_train, reuse=reuse)
