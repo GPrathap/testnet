@@ -79,15 +79,12 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h6 = tf.nn.tanh(net_h6)
     return net_h6, logits
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
 def conditional_discriminator_simplified_api(inputs, condition, is_train=True, reuse=False):
     conditinal_input = tf.concat([inputs, condition], 0)
     return discriminator_simplified_api(conditinal_input, is_train, reuse)
 
 def discriminator_simplified_api(inputs, is_train=True, reuse=False):
-    k = 5
+    k = 3
     df_dim = 16 # Dimension of discrim filters in first conv layer. [64]
     w_init = tf.random_normal_initializer(stddev=0.02)
     gamma_init = tf.random_normal_initializer(1., 0.02)
