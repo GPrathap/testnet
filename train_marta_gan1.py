@@ -111,6 +111,8 @@ def main(_):
         for k, v in zip(variables_names, values):
             print("Variable: ", k)
             print("Shape: ", v.shape)
+        total_parameters = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+        print("Total number of parameters: "+ str(total_parameters))
 
         data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
 
