@@ -174,11 +174,9 @@ def main(_):
 
                 if np.mod(epoch, 5) == 0:
                     print("[*] Saving checkpoints...")
-                    save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=5)
+                    save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=epoch)
                     print("Model saved in path: %s" % save_path)
                     print("[*] Saving checkpoints SUCCESS!")
-
-
 
 if __name__ == '__main__':
     tf.app.run()
