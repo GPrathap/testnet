@@ -148,7 +148,7 @@ def main(_):
                     batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
                     start_time = time.time()
 
-                    for _ in range(4):
+                    for _ in range(1):
                         errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
                     for _ in range(2):
                         errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
