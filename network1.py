@@ -117,7 +117,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
         net_h2 = batch_normalization_layer(net_h2, gamma_init, 'd/h2/batch_norm'
                                            , is_train, is_train, reuse=reuse)
 
-        net_h3 = tf.layers.conv2d(net_h2, df_dim * 8, [k, k], strides=(2,2), padding='SAME',
+        net_h3 = tf.layers.conv2d(net_h2, net_h2.shape[3]*2, [k, k], strides=(2,2), padding='SAME',
                                           activation=None)
         net_h3 = batch_normalization_layer(net_h3, gamma_init, 'd/h3/batch_norm'
                                            , is_train, is_train, reuse=reuse)
@@ -125,7 +125,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
         global_max1 = tf.layers.max_pooling2d( net_h3, [4,4], strides=1, padding='SAME')
         global_max1 = tf.layers.flatten(global_max1)
 
-        net_h4 = tf.layers.conv2d(net_h3, df_dim * 16, [k, k], strides=(2,2), padding='SAME',
+        net_h4 = tf.layers.conv2d(net_h3, net_h3.shape[3]*2, [k, k], strides=(2,2), padding='SAME',
                                           activation=None)
         net_h4 = batch_normalization_layer(net_h4, gamma_init, 'd/h4/batch_norm'
                                            , is_train, is_train, reuse=reuse)
@@ -133,7 +133,7 @@ def discriminator_simplified_api(inputs, is_train=True, reuse=False):
         global_max2 = tf.layers.max_pooling2d(net_h4, [2, 2], strides=1, padding='SAME')
         global_max2 = tf.layers.flatten(global_max2, name='d/h4/flatten')
 
-        net_h5 = tf.layers.conv2d(net_h4, df_dim * 32, [k, k], strides=(2,2), padding='SAME',
+        net_h5 = tf.layers.conv2d(net_h4, net_h4.shape[3]*2, [k, k], strides=(2,2), padding='SAME',
                                           activation=None)
         net_h5 = batch_normalization_layer(net_h5, gamma_init, 'd/h5/batch_norm'
                                            , is_train, is_train, reuse=reuse)
