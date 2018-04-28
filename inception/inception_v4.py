@@ -148,7 +148,7 @@ def inception_v4_base(inputs, final_endpoint='Mixed_7d', scope=None):
     with slim.arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d],
                         stride=1, padding='SAME'):
       # 299 x 299 x 3
-      net = slim.conv2d(inputs, 32, [3, 3], stride=2,
+      net = slim.conv2d(inputs, 16, [2, 2], stride=2,
                         padding='VALID', scope='Conv2d_1a_3x3')
       if add_and_check_final('Conv2d_1a_3x3', net): return net, end_points
       # 149 x 149 x 32
@@ -234,30 +234,12 @@ def inception_v4(inputs, num_classes=1001,
                  reuse=None,
                  scope='InceptionV4',
                  create_aux_logits=True):
-  """Creates the Inception V4 model.
 
-  Args:
-    inputs: a 4-D tensor of size [batch_size, height, width, 3].
-    num_classes: number of predicted classes. If 0 or None, the logits layer
-      is omitted and the input features to the logits layer (before dropout)
-      are returned instead.
-    is_training: whether is training or not.
-    dropout_keep_prob: float, the fraction to keep before final layer.
-    reuse: whether or not the network and its variables should be reused. To be
-      able to reuse 'scope' must be given.
-    scope: Optional variable_scope.
-    create_aux_logits: Whether to include the auxiliary logits.
-
-  Returns:
-    net: a Tensor with the logits (pre-softmax activations) if num_classes
-      is a non-zero integer, or the non-dropped input to the logits layer
-      if num_classes is 0 or None.
-    end_points: the set of end_points from the inception model.
-  """
   end_points = {}
   with tf.variable_scope(scope, 'InceptionV4', [inputs], reuse=reuse) as scope:
     with slim.arg_scope([slim.batch_norm, slim.dropout],
                         is_training=is_training):
+
       net, end_points = inception_v4_base(inputs, scope=scope)
 
       final_feature_set = []
