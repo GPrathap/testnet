@@ -27,6 +27,16 @@ def batch_normalization_layer(layer, gamma_init, is_training):
     #return layer
 
 def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
+    image_size = 64
+    k = 4
+    # 128, 64, 32, 16
+    s2, s4, s8, s16, s32, s64 = int(image_size/2), int(image_size/4), int(image_size/8),\
+                                int(image_size/16), int(image_size/32), int(image_size/64)
+
+
+    gf_dim = 16 # Dimension of gen filters in first conv layer. [64]
+
+    w_init = tf.random_normal_initializer(stddev=0.02)
     gamma_init = tf.random_normal_initializer(1., 0.02)
 
     with tf.variable_scope("generator", reuse=reuse):
@@ -89,10 +99,9 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h62 = tf.layers.conv2d_transpose(net_h52, 3, [3,3], strides=(2, 2), padding='SAME', activation=None)
         net_h63 = tf.layers.conv2d_transpose(net_h53, 3, [5,5], strides=(2, 2), padding='SAME', activation=None)
 
-
         net_h60 = tf.concat(axis=3, values=[net_h61, net_h62, net_h63])
 
-        net_h60 = tf.concat(axis=3, values=[net_h61, net_h62, net_h63])
+
 
         logits = net_h63
         net_h6 = tf.nn.tanh(net_h63)

@@ -10,7 +10,7 @@ from glob import glob
 from random import shuffle
 from tensorlayer.layers import *
 from utils import *
-from network import *
+from network1 import *
 
 pp = pprint.PrettyPrinter()
 
