@@ -85,7 +85,7 @@ def main(_):
         if not os.path.exists(FLAGS.feature_dir):
             os.makedirs(FLAGS.feature_dir)
 
-        print('extract traning feature')
+        print('extract trained feature')
 
         data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
         shuffle(data_files)

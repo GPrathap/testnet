@@ -92,7 +92,7 @@ def create_mine_grid(rows, cols, dim, space, anchors, spherical, gaussian):
                 lastX = space * (x // space)
                 nextX = lastX + space
                 fracX = (x - lastX) / float(space)
-#                 print("{} - {} - {}".format(lastX, nextX, fracX))
+                #print("{} - {} - {}".format(lastX, nextX, fracX))
                 u_list[y,x,:] = lerpv(fracX, u_list[y, lastX, :], u_list[y, nextX, :])
     # interpolate vertically
     for y in range(rows):

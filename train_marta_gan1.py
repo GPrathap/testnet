@@ -112,6 +112,7 @@ def main(_):
             print("Variable: ", k)
             print("Shape: ", v.shape)
         total_parameters = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+
         print("Total number of parameters: "+ str(total_parameters))
 
         data_files = glob(os.path.join("/data/images/", FLAGS.dataset, "*.jpg"))
@@ -148,7 +149,9 @@ def main(_):
                     batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
                                        resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
                     batch_images = np.array(batch).astype(np.float32)
-                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                    #batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                    #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
+                    batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                     start_time = time.time()
 
                     for _ in range(1):
