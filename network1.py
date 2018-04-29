@@ -76,13 +76,13 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         depth_of_h6 = int(depth_of_h5 / 2)
         net_h61 = tf.layers.conv2d_transpose(net_h51, depth_of_h6, [1, 1], strides=(2, 2), padding='SAME',
                                              activation=None)
-        net_h61 = batch_normalization_layer(net_h61, gamma_init, is_train)
+        #net_h61 = batch_normalization_layer(net_h61, gamma_init, is_train)
         net_h62 = tf.layers.conv2d_transpose(net_h52, depth_of_h6, [3, 3], strides=(2, 2), padding='SAME',
                                              activation=None)
-        net_h62 = batch_normalization_layer(net_h62, gamma_init, is_train)
+        #net_h62 = batch_normalization_layer(net_h62, gamma_init, is_train)
         net_h63 = tf.layers.conv2d_transpose(net_h53, depth_of_h6, [5, 5], strides=(2, 2), padding='SAME',
                                              activation=None)
-        net_h63 = batch_normalization_layer(net_h63, gamma_init, is_train)
+        #net_h63 = batch_normalization_layer(net_h63, gamma_init, is_train)
 
         net_h71 = tf.concat(axis=3, values=[net_h61, net_h62, net_h63])
         net_h72 = tf.layers.conv2d_transpose(net_h71, 6, [1, 1], strides=(1, 1), padding='SAME',
