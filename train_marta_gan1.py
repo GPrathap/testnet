@@ -13,6 +13,7 @@ from random import shuffle
 
 from convert_to_tf_record import DataConvertor
 from grid_layout import create_mine_grid
+from network1 import Neotx
 from utils import *
 from network71 import *
 pp = pprint.PrettyPrinter()
@@ -35,13 +36,13 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint29", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "/data/samples28", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint30", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples30", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
-flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
+flags.DEFINE_string('dataset_dir', '/data/neotx', 'Location of data.')
 flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training images data.')
 flags.DEFINE_string('dataset_path_test', '/data/images/uc_test_256/**.jpg', 'Location of testing images data.')
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')
@@ -64,21 +65,18 @@ def main(_):
                    'storagetanks', 'tenniscourt']
     # with tf.device("/gpu:0"): # <-- if you have a GPU machine
     z = tf.placeholder(tf.float32, [FLAGS.batch_size, z_dim], name='z_noise')
-    data_convotor = DataConvertor(classesList, FLAGS.image_size, FLAGS.dataset_name,
-                                  FLAGS.dataset_storage_location)
-
-    # data_convotor.convert_into_tfrecord(dataset_path, True)
-    real_images, one_hot_labels, total_number_of_images, _ = data_convotor.provide_data(FLAGS.batch_size, 'train')
-
+    real_images = tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size,
+                                              FLAGS.output_size, FLAGS.c_dim], name='real_images')
+    neoxt = Neotx()
     # z --> generator for training
-    net_g, g_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=True, reuse=tf.AUTO_REUSE)
+    net_g, g_logits = neoxt.generator(z, is_train=True, reuse=tf.AUTO_REUSE)
     # generated fake images --> discriminator
-    net_d, d_logits, feature_fake = discriminator_simplified_api(net_g, is_train=True, reuse=tf.AUTO_REUSE)
+    net_d, d_logits, feature_fake = neoxt.discriminator(net_g, is_train=True, reuse=tf.AUTO_REUSE)
     # real images --> discriminator
-    net_d2, d2_logits, feature_real = discriminator_simplified_api(real_images, is_train=True, reuse=True)
+    net_d2, d2_logits, feature_real = neoxt.discriminator(real_images, is_train=True, reuse=True)
     # sample_z --> generator for evaluation, set is_train to False
     # so that BatchNormLayer behave differently
-    net_g2, g2_logits = generator_simplified_api(z, FLAGS.batch_size, is_train=False, reuse=True)
+    net_g2, g2_logits = neoxt.generator(z, is_train=False, reuse=True)
     net_d3, d3_logits, _ = discriminator_simplified_api(real_images, is_train=False, reuse=True)
 
     # cost for updating discriminator and generator
