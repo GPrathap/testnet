@@ -15,7 +15,6 @@ from convert_to_tf_record import DataConvertor
 from grid_layout import create_mine_grid
 from network1 import Neotx
 from utils import *
-from network71 import *
 pp = pprint.PrettyPrinter()
 
 """
@@ -76,7 +75,7 @@ def main(_):
     # sample_z --> generator for evaluation, set is_train to False
     # so that BatchNormLayer behave differently
     net_g2, g2_logits = neoxt.generator(z, is_train=False, reuse=True)
-    net_d3, d3_logits, _ = discriminator_simplified_api(real_images, is_train=False, reuse=True)
+    net_d3, d3_logits, _ = neoxt.discriminator(real_images, is_train=False, reuse=True)
 
     # cost for updating discriminator and generator
     # discriminator: real images are labelled as 1
