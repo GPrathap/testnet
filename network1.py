@@ -8,7 +8,8 @@ def conditional_generator_simplified_api(inputs, condition, batch_size, is_train
     return generator_simplified_api(conditinal_input, batch_size, is_train, reuse)
 
 
-def batch_normalization_layer(layer, gamma_init, is_training):
+def batch_normalization_layer(layer, gamma_inijjt, is_training):
+    gamma_init = tf.random_normal_initializer(1., 0.02)
     layer = tf.layers.batch_normalization(layer, epsilon=1e-12, gamma_initializer=gamma_init,
                                           training=is_training)
     return tf.nn.leaky_relu(layer, 0.2)
@@ -37,7 +38,6 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h11 = batch_normalization_layer(net_h11, gamma_init, is_train)
         net_h12 = tf.layers.conv2d_transpose(net_h02, depth_of_h1, [3, 3], strides=(2, 2), padding='SAME', activation=None)
         net_h12 = batch_normalization_layer(net_h12, gamma_init, is_train)
-
         net_h13 = tf.layers.conv2d_transpose(net_h03, depth_of_h1, [5, 5], strides=(2, 2), padding='SAME', activation=None)
         net_h13 = batch_normalization_layer(net_h13, gamma_init, is_train)
 
