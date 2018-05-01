@@ -102,24 +102,10 @@ def _add_to_tfrecord(filename, tfrecord_writer, offset=0):
 
 
 def _get_output_filename(dataset_dir, split_name):
-  """Creates the output filename.
-
-  Args:
-    dataset_dir: The dataset directory where the dataset is stored.
-    split_name: The name of the train/test split.
-
-  Returns:
-    An absolute file path.
-  """
   return '%s/satellite_%s.tfrecord' % (dataset_dir, split_name)
 
 
 def _download_and_uncompress_dataset(dataset_dir):
-  """Downloads cifar10 and uncompresses it locally.
-
-  Args:
-    dataset_dir: The directory where the temporary files are stored.
-  """
   filename = _DATA_URL.split('/')[-1]
   filepath = os.path.join(dataset_dir, filename)
 
@@ -133,21 +119,6 @@ def _download_and_uncompress_dataset(dataset_dir):
     statinfo = os.stat(filepath)
     print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
     tarfile.open(filepath, 'r:gz').extractall(dataset_dir)
-
-
-def _clean_up_temporary_files(dataset_dir):
-  """Removes temporary files used to create the dataset.
-
-  Args:
-    dataset_dir: The directory where the temporary files are stored.
-  """
-  # filename = _DATA_URL.split('/')[-1]
-  # filepath = os.path.join(dataset_dir, filename)
-  # tf.gfile.Remove(filepath)
-  #
-  # tmp_dir = os.path.join(dataset_dir, 'cifar-10-batches-py')
-  # tf.gfile.DeleteRecursively(tmp_dir)
-
 
 def run(dataset_dir, train=True):
   """Runs the download and conversion operation.
