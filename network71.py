@@ -94,14 +94,16 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
         net_h63 = tf.layers.conv2d_transpose(net_h53, depth_of_h6, [5, 5], strides=(2, 2), padding='SAME',
                                              activation=None)
         #net_h63 = batch_normalization_layer(net_h63, gamma_init, is_train)
-
+        net_h63 = tf.layers.conv2d_transpose(net_h63, 3, [3, 3], strides=(1, 1), padding='SAME',
+                                             activation=tf.identity)
         net_h71 = tf.concat(axis=3, values=[net_h61, net_h62, net_h63])
         net_h72 = tf.layers.conv2d_transpose(net_h71, 6, [1, 1], strides=(1, 1), padding='SAME',
                                              activation=tf.identity)
         net_h73 = tf.layers.conv2d_transpose(net_h72, 3, [1, 1], strides=(1, 1), padding='SAME',
                                              activation=tf.identity)
 
-        logits = net_h73
+
+        logits = net_h63
         net_h7 = tf.nn.tanh(net_h73)
     return net_h7, logits
 
