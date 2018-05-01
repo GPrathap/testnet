@@ -40,7 +40,6 @@ flags.DEFINE_string("checkpoint_dir", "/data/checkpoint30", "Directory name to s
 flags.DEFINE_string("sample_dir", "/data/samples30", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
-flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
 flags.DEFINE_string('dataset_dir', '/data/neotx', 'Location of data.')
 flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training images data.')
