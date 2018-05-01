@@ -5,8 +5,8 @@ classesList = ["agricultural", 'airplane', 'baseballdiamond', 'beach', 'building
                    'mobilehomepark', 'overpass', 'parkinglot', 'river', 'runway', 'sparseresidential',
                    'storagetanks', 'tenniscourt']
 
-dataset_path_train = "/data/images/uc_train_256_data/**.jpg"
-dataset_path_test = "/data/images/uc_test_256/**.jpg"
+dataset_path_train = "/data/images/data/uc_train_256_data/**.jpg"
+dataset_path_test = "/data/images/data/uc_test_256/**.jpg"
 dataset_storage_location = "/data/neotx"
 dataset_name = "ucdataset"
 image_size = 64
