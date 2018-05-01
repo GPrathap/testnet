@@ -36,8 +36,8 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint26", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "/data/samples26", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint29", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples29", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
@@ -70,10 +70,10 @@ def main(_):
 
     data_convotor = DataConvertor(classesList, FLAGS.image_size, FLAGS.dataset_name,
                                   FLAGS.dataset_storage_location)
-    neoxt = Neotx()
+
     # data_convotor.convert_into_tfrecord(dataset_path, True)
     real_images, one_hot_labels, total_number_of_images, _  = data_convotor.provide_data(FLAGS.batch_size, 'train')
-
+    neoxt = Neotx()
     # z --> generator for training
     net_g, g_logits = neoxt.generator(z, is_train=True, reuse=tf.AUTO_REUSE)
     # generated fake images --> discriminator
