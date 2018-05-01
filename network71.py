@@ -104,7 +104,7 @@ def generator_simplified_api(inputs, batch_size, is_train=True, reuse=False):
 
 
         logits = net_h63
-        net_h7 = tf.nn.tanh(net_h73)
+        net_h7 = tf.nn.tanh(net_h63)
     return net_h7, logits
 
 def conditional_discriminator_simplified_api(inputs, condition, is_train=True, reuse=False):
