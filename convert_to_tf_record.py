@@ -4,7 +4,6 @@ import sys
 import tarfile
 import glob
 from six.moves import cPickle as pickle
-from sklearn import preprocessing
 import numpy as np
 import scipy.misc
 import tensorflow as tf
