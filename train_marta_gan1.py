@@ -35,13 +35,15 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint30", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint30", "Directory name to save the checkpoints "
+                                                            "[checkpoint]")
 flags.DEFINE_string("sample_dir", "/data/samples30", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
 flags.DEFINE_string('dataset_dir', '/data/neotx', 'Location of data.')
-flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training images data.')
+flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training '
+                                                                                   'images data.')
 flags.DEFINE_string('dataset_path_test', '/data/images/uc_test_256/**.jpg', 'Location of testing images data.')
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')
 flags.DEFINE_string('dataset_name', 'ucdataset', 'Data set name')
@@ -156,17 +158,21 @@ def main(_):
                 for idx in range(batch_idxs):
                     batch_files = data_files[idx*FLAGS.batch_size:(idx+1)*FLAGS.batch_size]
                     batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
-                                       resize_w=FLAGS.output_size, is_grayscale = 0) for batch_file in batch_files]
+                                       resize_w=FLAGS.output_size, is_grayscale = 0)
+                             for batch_file in batch_files]
                     batch_images = np.array(batch).astype(np.float32)
-                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim))\
+                        .astype(np.float32)
                     #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                     #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                     start_time = time.time()
 
                     for _ in range(1):
-                        errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
+                        errD, _ = sess.run([d_loss, d_optim]
+                                           , feed_dict={z: batch_z, real_images: batch_images })
                     for _ in range(2):
-                        errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
+                        errG, _ = sess.run([g_loss, g_optim]
+                                           , feed_dict={z: batch_z, real_images: batch_images})
                     print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
                             % (epoch, FLAGS.epoch, idx, batch_idxs,
                                 time.time() - start_time, errD, errG))

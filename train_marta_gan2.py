@@ -15,7 +15,7 @@ import data_provider_sattelite
 from convert_to_tf_record import DataConvertor
 from grid_layout import create_mine_grid
 from utils import *
-from network1 import *
+from network1 import Neotx
 pp = pprint.PrettyPrinter()
 
 """
@@ -36,8 +36,8 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint29", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "/data/samples29", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint31", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples31", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
