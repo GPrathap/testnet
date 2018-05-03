@@ -161,9 +161,9 @@ def main(_):
                                        resize_w=FLAGS.output_size, is_grayscale = 0)
                              for batch_file in batch_files]
                     batch_images = np.array(batch).astype(np.float32)
-                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim))\
-                        .astype(np.float32)
-                    #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
+                    #batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim))\
+                    #    .astype(np.float32)
+                    batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                     #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                     start_time = time.time()
 
