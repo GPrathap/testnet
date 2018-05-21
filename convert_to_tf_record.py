@@ -135,13 +135,13 @@ class DataConvertor():
             shuffle=(split_name == split_name))
         [image, label] = provider.get(['image', 'label'])
         # Preprocess the images.
-        image = (tf.to_float(image) - 128.0) / 128.0
+        image = (tf.to_float(image)/127.5) - 1.
         # Creates a QueueRunner for the pre-fetching operation.
         images, labels = tf.train.batch(
             [image, label],
             batch_size=batch_size,
             num_threads=1,
-            capacity=5 * batch_size)
+            capacity=100 * batch_size)
 
         labels = tf.reshape(labels, [-1])
         if one_hot:
@@ -149,7 +149,7 @@ class DataConvertor():
         return images, labels, dataset.num_samples, dataset.num_classes
 
     def float_image_to_uint8(self, image):
-        image = (image * 128.0) + 128.0
+        image = (image * 127.5) + 127.5
         return tf.cast(image, tf.uint8)
 
     def get_total_number_of_images(self, split_name, dataset_name):

@@ -160,6 +160,7 @@ def main(_):
                     batch = [get_image(batch_file, FLAGS.image_size, is_crop=FLAGS.is_crop,
                                        resize_w=FLAGS.output_size, is_grayscale = 0)
                              for batch_file in batch_files]
+
                     batch_images = np.array(batch).astype(np.float32)
                     batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim))\
                         .astype(np.float32)
