@@ -160,6 +160,7 @@ class DataConvertor():
     def get_split(self, split_name):
         file_pattern = self.dataset_name+'_'+split_name+'.tfrecord'
         file_pattern = os.path.join(self.dataset_storage_location, file_pattern)
+        print("file path.."+ file_pattern)
         reader = tf.TFRecordReader
 
         keys_to_features = {
