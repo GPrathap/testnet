@@ -122,12 +122,12 @@ def main(_):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
-        variables_names = [v.name for v in tf.trainable_variables()]
+        #variables_names = [v.name for v in tf.trainable_variables()]
 
-        values = sess.run(variables_names)
-        for k, v in zip(variables_names, values):
-            print("Variable: ", k)
-            print("Shape: ", v.shape)
+        #values = sess.run(variables_names)
+        #for k, v in zip(variables_names, values):
+        #    print("Variable: ", k)
+        #    print("Shape: ", v.shape)
         total_parameters = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
 
         print("Total number of parameters: "+ str(total_parameters))
