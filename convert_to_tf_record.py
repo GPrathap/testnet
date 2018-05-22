@@ -126,7 +126,45 @@ class DataConvertor():
                 f.write('%d:%s\n' % (label, class_name))
 
 
-    def provide_data(self, batch_size, split_name='train', one_hot=True):
+    def provide_data(self, batch_size, number_of_channels, split_name='train', one_hot=True):
+
+        # Creates a dataset that reads all of the examples from filenames.
+        filenames = [ self.get_tfrecord_file_location(self.dataset_name, split_name)]
+        dataset = tf.data.TFRecordDataset(filenames)
+
+        # for version 1.5 and above use tf.data.TFRecordDataset
+
+        # example proto decode
+        def _parse_function(example_proto):
+            keys_to_features = {
+                'image/encoded': tf.FixedLenFeature((), tf.string, default_value=''),
+                'image/format': tf.FixedLenFeature((), tf.string, default_value='png'),
+                'image/class/label': tf.FixedLenFeature(
+                    [], tf.int64, default_value=tf.zeros([], dtype=tf.int64)),
+            }
+            parsed_features = tf.parse_single_example(example_proto, keys_to_features)
+
+            return tf.image.decode_image(parsed_features['image/encoded'], number_of_channels)\
+                , parsed_features['image/class/label']
+
+        # Parse the record into tensors.
+        dataset = dataset.map(_parse_function)
+
+        # Shuffle the dataset
+        dataset = dataset.shuffle(buffer_size=10000)
+
+        # Repeat the input indefinitly
+        #dataset = dataset.repeat()
+
+        # Generate batches
+        dataset = dataset.batch(batch_size)
+
+        # Create a one-shot iterator
+        iterator = dataset.make_initializable_iterator()
+        next_batch = iterator.get_next()
+
+
+        '''
         dataset = self.get_split(split_name)
         provider = slim.dataset_data_provider.DatasetDataProvider(
             dataset,
@@ -142,11 +180,13 @@ class DataConvertor():
             batch_size=batch_size,
             num_threads=1,
             capacity=100 * batch_size)
-
+            
         labels = tf.reshape(labels, [-1])
         if one_hot:
             labels = tf.one_hot(labels, dataset.num_classes)
-        return images, labels, dataset.num_samples, dataset.num_classes
+        return images, labels, dataset.num_samples, dataset.num_classes, next_element, iterator
+        '''
+        return next_batch, iterator
 
     def float_image_to_uint8(self, image):
         image = (image * 127.5) + 127.5
@@ -156,6 +196,10 @@ class DataConvertor():
         file_pattern = dataset_name + '_' + split_name + '.tfrecord'
         file_pattern = os.path.join(self.dataset_storage_location, file_pattern)
         return sum(1 for _ in tf.python_io.tf_record_iterator(file_pattern))
+
+    def get_tfrecord_file_location(self, dataset_name, split_name):
+        file_pattern = dataset_name + '_' + split_name + '.tfrecord'
+        return os.path.join(self.dataset_storage_location, file_pattern)
 
     def get_split(self, split_name):
         file_pattern = self.dataset_name+'_'+split_name+'.tfrecord'

@@ -36,8 +36,8 @@ flags.DEFINE_integer("c_dim", 3, "Dimension of image color. [3]")
 flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [500]")
 flags.DEFINE_integer("save_step", 50, "The interval of saveing checkpoints. [500]")
 flags.DEFINE_string("dataset", "uc_train_256_data", "The name of dataset [celebA, mnist, lsun]")
-flags.DEFINE_string("checkpoint_dir", "/data/checkpoint40", "Directory name to save the checkpoints [checkpoint]")
-flags.DEFINE_string("sample_dir", "/data/samples40", "Directory name to save the image samples [samples]")
+flags.DEFINE_string("checkpoint_dir", "/data/checkpoint41", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("sample_dir", "/data/samples41", "Directory name to save the image samples [samples]")
 flags.DEFINE_boolean("is_train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("is_crop", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
@@ -72,7 +72,9 @@ def main(_):
                                   FLAGS.dataset_storage_location)
 
     # data_convotor.convert_into_tfrecord(dataset_path, True)
-    real_images, one_hot_labels, total_number_of_images, _  = data_convotor.provide_data(FLAGS.batch_size, 'train')
+    next_batch, iterator = data_convotor.provide_data(FLAGS.batch_size, FLAGS.c_dim,  'train')
+    real_images = tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size,
+                                              FLAGS.output_size, FLAGS.c_dim], name='real_images')
     neoxt = Neotx()
     # z --> generator for training
     net_g, g_logits = neoxt.generator(z, is_train=True, reuse=tf.AUTO_REUSE)
@@ -121,7 +123,6 @@ def main(_):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
         #variables_names = [v.name for v in tf.trainable_variables()]
 
         #values = sess.run(variables_names)
@@ -141,37 +142,40 @@ def main(_):
 
         sample_seed = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
         if FLAGS.is_train:
-            iter_counter = 0
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(coord=coord)
             for epoch in range(FLAGS.epoch):
+                iter_counter = 0
+                batch_images_for_testing = []
+                sess.run(iterator.initializer)
+                while True:
+                    try:
 
-                batch_idxs = total_number_of_images // FLAGS.batch_size
-                batch_images = []
-                for idx in range(batch_idxs):
+                        batch_images = sess.run([next_batch])
+                        batch_images = np.array(batch_images[0][0], dtype=np.float32)/127.5-1
+                        batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                        # batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
+                        # batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
+                        start_time = time.time()
 
-                    batch_images, _ = sess.run([real_images, one_hot_labels])
-                    batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
-                    #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
-                    #batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
-                    start_time = time.time()
+                        for _ in range(1):
+                            errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images})
+                        for _ in range(2):
+                            errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
+                        print("Epoch: [%2d/%2d] [%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
+                              % (epoch, FLAGS.epoch, iter_counter,
+                                 time.time() - start_time, errD, errG))
+                        sys.stdout.flush()
+                        iter_counter += 1
+                        if iter_counter == 1:
+                            batch_images_for_testing = batch_images
 
-                    for _ in range(1):
-                        errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images })
-                    for _ in range(2):
-                        errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
-                    print("Epoch: [%2d/%2d] [%4d/%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
-                            % (epoch, FLAGS.epoch, idx, batch_idxs,
-                                time.time() - start_time, errD, errG))
-                    sys.stdout.flush()
-
-                    iter_counter += 1
+                    except tf.errors.OutOfRangeError:
+                        break
 
                 if np.mod(epoch, 1) == 0:
                     img, errG = sess.run([net_g2, g_loss],
-                                         feed_dict={z : sample_seed, real_images: batch_images})
+                                         feed_dict={z : sample_seed, real_images: batch_images_for_testing})
                     D, D_, errD = sess.run([net_d3, net_d3, d_loss_real],
-                                           feed_dict={real_images: batch_images})
+                                           feed_dict={real_images: batch_images_for_testing})
 
                     save_images(img, [8, 8], '{}/train_{:02d}.png'.format(FLAGS.sample_dir, epoch))
                     print("[Sample] d_loss: %.8f, g_loss: %.8f" % (errD, errG))
@@ -182,10 +186,6 @@ def main(_):
                     save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=epoch)
                     print("Model saved in path: %s" % save_path)
                     print("[*] Saving checkpoints SUCCESS!")
-
-            coord.request_stop()
-            # Wait for threads to stop
-            coord.join(threads)
 
 if __name__ == '__main__':
     tf.app.run()
