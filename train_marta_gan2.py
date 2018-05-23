@@ -10,7 +10,7 @@ from tensorflow.contrib import slim
 from tensorlayer.layers import *
 from glob import glob
 from random import shuffle
-
+import matplotlib.pyplot as plt
 import data_provider_sattelite
 from convert_to_tf_record import DataConvertor
 from grid_layout import create_mine_grid
@@ -143,12 +143,12 @@ def main(_):
                 sess.run(iterator.initializer)
                 while True:
                     try:
-
                         batch_images = sess.run([next_batch])
+                        #for i in range(0,50):
+                        #    plt.imshow(batch_images[0][0][i])
+                        #    plt.show()
                         batch_images = np.array(batch_images[0][0], dtype=np.float32)/127.5-1
                         batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
-                        # batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
-                        # batch_z = np.transpose(create_mine_grid(1, z_dim, FLAGS.batch_size, 99, None, True, True))
                         start_time = time.time()
 
                         for _ in range(1):

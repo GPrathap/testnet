@@ -6,7 +6,7 @@ Created on Mon Oct 30 20:47:21 2017
 @author: ldy
 """
 import scipy.misc
-
+import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -33,6 +33,8 @@ def transform(image, npx=64, is_crop=True, resize_w=64):
         cropped_image = center_crop(image, npx, resize_w=resize_w)
     else:
         cropped_image = image
+        #plt.imshow(cropped_image)
+        #plt.show()
     return np.array(cropped_image)/127.5 - 1.
 
 def inverse_transform(images):

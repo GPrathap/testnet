@@ -56,6 +56,33 @@ class DataConvertor():
             tfrecord_writer.write(example.SerializeToString())
       return offset + num_images
 
+    def _add_to_tfrecord_new(self, filename, tfrecord_writer, offset=0):
+      with tf.gfile.Open(filename, 'rb') as f:
+        if sys.version_info < (3,):
+          data = cPickle.load(f)
+        else:
+          data = cPickle.load(f, encoding='bytes')
+      images = data['images']
+      labels = data['labels']
+      images = np.array(images)
+      num_images = images.shape[0]
+      for X, y in zip(images,labels):
+          # Feature contains a map of string to feature proto objects
+          feature = {}
+          feature['X'] = tf.train.Feature(float_list=tf.train.FloatList(value=X.flatten()))
+          feature['y'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[y]))
+
+          # Construct the Example proto object
+          example = tf.train.Example(features=tf.train.Features(feature=feature))
+
+          # Serialize the example to a string
+          serialized = example.SerializeToString()
+
+          # write the serialized objec to the disk
+          tfrecord_writer.write(serialized)
+
+      #tfrecord_writer.close()
+
     def create_files(self, path):
       datalist = {}
       datalist["images"] = []
@@ -105,7 +132,8 @@ class DataConvertor():
         with tf.python_io.TFRecordWriter(training_filename) as tfrecord_writer:
           offset = 0
           filename = os.path.join(self.dataset_storage_location, self.dataset_name + "_train.pickle")
-          offset = self._add_to_tfrecord(filename, tfrecord_writer, offset)
+          #offset = self._add_to_tfrecord(filename, tfrecord_writer, offset)
+          offset = self._add_to_tfrecord_new(filename, tfrecord_writer, offset)
           labels_to_class_names = dict(zip(range(len(self.classes_list)), self.classes_list))
           self.write_label_file(labels_to_class_names)
           print('\nFinished converting the '+self.dataset_name+' dataset!')
@@ -113,7 +141,7 @@ class DataConvertor():
         testing_filename = self._get_output_filename('test')
         with tf.python_io.TFRecordWriter(testing_filename) as tfrecord_writer:
           filename = os.path.join(self.dataset_storage_location, self.dataset_name + "_test.pickle")
-          self._add_to_tfrecord(filename, tfrecord_writer)
+          self._add_to_tfrecord_new(filename, tfrecord_writer)
         labels_to_class_names = dict(zip(range(len(self.classes_list)), self.classes_list))
         self.write_label_file(labels_to_class_names)
         print('\nFinished converting the  dataset!')
@@ -136,16 +164,11 @@ class DataConvertor():
 
         # example proto decode
         def _parse_function(example_proto):
-            keys_to_features = {
-                'image/encoded': tf.FixedLenFeature((), tf.string, default_value=''),
-                'image/format': tf.FixedLenFeature((), tf.string, default_value='png'),
-                'image/class/label': tf.FixedLenFeature(
-                    [], tf.int64, default_value=tf.zeros([], dtype=tf.int64)),
-            }
+            keys_to_features = {'X': tf.FixedLenFeature(([64, 64, 3]), tf.float32),
+                                'y': tf.FixedLenFeature((), tf.int64, default_value=0)}
             parsed_features = tf.parse_single_example(example_proto, keys_to_features)
 
-            return tf.image.decode_image(parsed_features['image/encoded'], number_of_channels)\
-                , parsed_features['image/class/label']
+            return parsed_features['X'], parsed_features['y']
 
         # Parse the record into tensors.
         dataset = dataset.map(_parse_function)

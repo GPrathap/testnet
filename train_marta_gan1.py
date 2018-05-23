@@ -176,7 +176,6 @@ def main(_):
                             % (epoch, FLAGS.epoch, idx, batch_idxs,
                                 time.time() - start_time, errD, errG))
                     sys.stdout.flush()
-
                     iter_counter += 1
 
                 if np.mod(epoch, 1) == 0:
