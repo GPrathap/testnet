@@ -123,12 +123,7 @@ def main(_):
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        #variables_names = [v.name for v in tf.trainable_variables()]
 
-        #values = sess.run(variables_names)
-        #for k, v in zip(variables_names, values):
-        #    print("Variable: ", k)
-        #    print("Shape: ", v.shape)
         total_parameters = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
 
         print("Total number of parameters: "+ str(total_parameters))
@@ -186,6 +181,13 @@ def main(_):
                     save_path = saver.save(sess, FLAGS.checkpoint_dir + '/model', global_step=epoch)
                     print("Model saved in path: %s" % save_path)
                     print("[*] Saving checkpoints SUCCESS!")
+
+def describe_network(sess):
+     variables_names = [v.name for v in tf.trainable_variables()]
+     values = sess.run(variables_names)
+     for k, v in zip(variables_names, values):
+        print("Variable: ", k)
+        print("Shape: ", v.shape)
 
 if __name__ == '__main__':
     tf.app.run()

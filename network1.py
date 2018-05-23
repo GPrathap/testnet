@@ -60,7 +60,7 @@ class Neotx():
     def get_neoxt_features(self, current_layers):
         features = []
         for current_layer in current_layers:
-            network =tf.layers.flatten(current_layer)
+            network = tf.layers.flatten(current_layer)
             features.append(network)
         return features
 
