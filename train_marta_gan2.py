@@ -10,7 +10,6 @@ from tensorflow.contrib import slim
 from tensorlayer.layers import *
 from glob import glob
 from random import shuffle
-import matplotlib.pyplot as plt
 import data_provider_sattelite
 from convert_to_tf_record import DataConvertor
 from grid_layout import create_mine_grid
