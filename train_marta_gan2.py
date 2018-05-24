@@ -101,7 +101,7 @@ def main(_):
         d_optim = d_optimizer.minimize(d_loss, var_list=d_vars)
         g_optim = g_optimizer.minimize(g_loss, var_list=g_vars)
 
-    saver = tf.train.Saver(max_to_keep=4)
+    saver = tf.train.Saver(max_to_keep=100)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
