@@ -62,29 +62,27 @@ def main(_):
     sess=tf.Session()
     sess.run(tf.initialize_all_variables())
 
-    print("[*] Loading checkpoints...")
     ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print("[*] Loading checkpoints...")
-    else:
-        print("[*] Loading checkpoints failed ...")
+    checkpoints_numbers = []
+    for checkpoint_path in ckpt.all_model_checkpoint_paths:
+        num = int(checkpoint_path.split("/")[-1].replace("model-",""))
+        checkpoints_numbers.append(num)
+        saver.restore(sess, checkpoint_path)
+        print("Loading checkpoints... {}".format(checkpoint_path))
 
-    nums = [75]
-    for num in nums:
         for iterator, next_batch, type in zip(next_batch_iterator_list, next_batch_list, next_batch_iterator_type):
             sess.run(iterator.initializer)
             if not os.path.exists(FLAGS.feature_dir):
                 os.makedirs(FLAGS.feature_dir)
             feature_vectors = []
             feature_labels = []
+            print("Start processing on {} dataset".format(type))
             while True:
                 try:
                     next_batch_ = sess.run([next_batch])
                     batch_images = np.array(next_batch_[0][0], dtype=np.float32) / 127.5 - 1
                     batch_labels = np.array(next_batch_[0][1], dtype=np.int)
                     feat = sess.run(features, feed_dict={real_images: batch_images})
-                    print(feat.shape)
                     feature_vectors.append(feat)
                     feature_labels.append(batch_labels)
 
@@ -99,6 +97,7 @@ def main(_):
                     np.save( name_for_features, feature_vectors)
                     np.save(name_for_feature_labels, feature_labels)
                     break
+    np.save('{}/features.npy'.format(FLAGS.feature_dir), checkpoints_numbers)
 
 if __name__ == '__main__':
     tf.app.run()
