@@ -10,10 +10,10 @@ import numpy as np
 acc = []
 nums = [75]
 for num in nums:
-    X_train = np.load('/home/runge/features/features%d_train.npy' % num)
-    y_train = np.load('/home/runge/features/label%d_train.npy' % num)
-    X_test = np.load('/home/runge/features/features%d_test.npy' % num)
-    y_test = np.load('/home/runge/features/label%d_test.npy' % num)
+    X_train = np.load('/data/features/features%d_train.npy' % num)
+    y_train = np.load('/data/features/label%d_train.npy' % num)
+    X_test = np.load('/data/features/features%d_test.npy' % num)
+    y_test = np.load('/data/features/label%d_test.npy' % num)
 
     print("Fitting the classifier to the training set")
     t0 = time()

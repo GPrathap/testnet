@@ -1,31 +1,20 @@
 import os
 import sys
-import scipy.misc
 import pprint
-import numpy as np
 import time
 import tensorflow as tf
-import tensorlayer as tl
-from tensorflow.contrib import slim
-from tensorlayer.layers import *
-from glob import glob
-from random import shuffle
-import data_provider_sattelite
-from convert_to_tf_record import DataConvertor
-from grid_layout import create_mine_grid
-from utils import *
-from network1 import Neotx
-pp = pprint.PrettyPrinter()
 
-"""
-TensorLayer implementation of DCGAN to generate face image.
-Usage : see README.md
-"""
+from Utils import save_images
+from convert_to_tf_record import DataConvertor
+from network import Neotx
+import numpy as np
+pp = pprint.PrettyPrinter()
 
 flags = tf.app.flags
 flags.DEFINE_integer("epoch", 200, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
+flags.DEFINE_float("beta2", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", 30000, "The size of train images [np.inf]")
 flags.DEFINE_integer("batch_size", 64, "The number of batch images [64]")
 flags.DEFINE_integer("image_size", 64, "The size of image to use (will be center cropped) [108]")
@@ -59,19 +48,13 @@ def main(_):
 
     z_dim = 100
 
-    classesList = ["agricultural", 'airplane', 'baseballdiamond', 'beach', 'buildings', 'chaparral'
-        , 'denseresidential', 'forest', 'freeway', 'golfcourse', 'harbor', 'intersection', 'mediumresidential',
-                   'mobilehomepark', 'overpass', 'parkinglot', 'river', 'runway', 'sparseresidential',
-                   'storagetanks', 'tenniscourt']
-
     # with tf.device("/gpu:0"): # <-- if you have a GPU machine
     z = tf.placeholder(tf.float32, [FLAGS.batch_size, z_dim], name='z_noise')
 
-    data_convotor = DataConvertor(classesList, FLAGS.image_size, FLAGS.dataset_name,
-                                  FLAGS.dataset_storage_location)
+    data_convotor = DataConvertor(FLAGS.image_size, FLAGS.dataset_name,
+                                  FLAGS.dataset_storage_location, FLAGS.c_dim)
 
-    # data_convotor.convert_into_tfrecord(dataset_path, True)
-    next_batch, iterator = data_convotor.provide_data(FLAGS.batch_size, FLAGS.c_dim,  'train')
+    next_batch, iterator = data_convotor.provide_data(FLAGS.batch_size,  'train')
     real_images = tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.output_size,
                                               FLAGS.output_size, FLAGS.c_dim], name='real_images')
     neoxt = Neotx()
@@ -82,7 +65,7 @@ def main(_):
     # real images --> discriminator
     net_d2, d2_logits, feature_real = neoxt.discriminator(real_images, is_train=True, reuse=True)
     # sample_z --> generator for evaluation, set is_train to False
-    # so that BatchNormLayer behave differently
+
     net_g2, g2_logits = neoxt.generator(z, is_train=False, reuse=True)
     net_d3, d3_logits, _ = neoxt.discriminator(real_images, is_train=False, reuse=True)
 
@@ -143,17 +126,17 @@ def main(_):
                 while True:
                     try:
                         batch_images = sess.run([next_batch])
-                        #for i in range(0,50):
-                        #    plt.imshow(batch_images[0][0][i])
-                        #    plt.show()
                         batch_images = np.array(batch_images[0][0], dtype=np.float32)/127.5-1
-                        batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim)).astype(np.float32)
+                        batch_z = np.random.uniform(low=-1, high=1, size=(FLAGS.batch_size, z_dim))\
+                            .astype(np.float32)
                         start_time = time.time()
 
                         for _ in range(1):
-                            errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z, real_images: batch_images})
+                            errD, _ = sess.run([d_loss, d_optim], feed_dict={z: batch_z
+                                , real_images: batch_images})
                         for _ in range(2):
-                            errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z, real_images: batch_images})
+                            errG, _ = sess.run([g_loss, g_optim], feed_dict={z: batch_z
+                                , real_images: batch_images})
                         print("Epoch: [%2d/%2d] [%4d] time: %4.4f, d_loss: %.8f, g_loss: %.8f" \
                               % (epoch, FLAGS.epoch, iter_counter,
                                  time.time() - start_time, errD, errG))

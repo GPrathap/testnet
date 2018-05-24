@@ -13,17 +13,14 @@ from dataset import dataset_utils
 slim = tf.contrib.slim
 
 class DataConvertor():
-    def __init__(self, classes_list, image_size, dataset_name, dataset_storage_location, channels=3):
-        self.classes_list = classes_list
-        self.number_of_classes = len(self.classes_list)
+    def __init__(self, image_size, dataset_name, dataset_storage_location, channels=3):
         self.image_size = image_size
         self.channels = channels
         self.dataset_name = dataset_name
         self.dataset_storage_location = dataset_storage_location
-        self.dataset_description = {
-            'image': 'A [ '+ str(self.image_size) +'] color images.',
-            'label': 'A single integer between 0 and '+ str(self.number_of_classes),
-        }
+        style_label_file = os.path.join("./", "dataset", self.dataset_name, "labels.txt")
+        self.classes_list = list(np.loadtxt(style_label_file, str, delimiter='\n'))
+        self.number_of_classes = len(self.classes_list)
 
         if not tf.gfile.Exists(self.dataset_storage_location):
             tf.gfile.MakeDirs(self.dataset_storage_location)
@@ -154,61 +151,26 @@ class DataConvertor():
                 f.write('%d:%s\n' % (label, class_name))
 
 
-    def provide_data(self, batch_size, number_of_channels, split_name='train', one_hot=True):
+    def provide_data(self, batch_size, split_name='train', one_hot=True):
 
         # Creates a dataset that reads all of the examples from filenames.
         filenames = [ self.get_tfrecord_file_location(self.dataset_name, split_name)]
         dataset = tf.data.TFRecordDataset(filenames)
 
-        # for version 1.5 and above use tf.data.TFRecordDataset
-
-        # example proto decode
         def _parse_function(example_proto):
-            keys_to_features = {'X': tf.FixedLenFeature(([64, 64, 3]), tf.float32),
+            keys_to_features = {'X': tf.FixedLenFeature(([self.image_size, self.image_size, self.channels])
+                                                        , tf.float32),
                                 'y': tf.FixedLenFeature((), tf.int64, default_value=0)}
             parsed_features = tf.parse_single_example(example_proto, keys_to_features)
 
             return parsed_features['X'], parsed_features['y']
 
-        # Parse the record into tensors.
         dataset = dataset.map(_parse_function)
-
-        # Shuffle the dataset
         dataset = dataset.shuffle(buffer_size=10000)
+        dataset = dataset.apply(tf.contrib.data.batch_and_drop_remainder(batch_size))
 
-        # Repeat the input indefinitly
-        #dataset = dataset.repeat()
-
-        # Generate batches
-        dataset = dataset.batch(batch_size)
-
-        # Create a one-shot iterator
         iterator = dataset.make_initializable_iterator()
         next_batch = iterator.get_next()
-
-
-        '''
-        dataset = self.get_split(split_name)
-        provider = slim.dataset_data_provider.DatasetDataProvider(
-            dataset,
-            common_queue_capacity=5 * batch_size,
-            common_queue_min=batch_size,
-            shuffle=(split_name == split_name))
-        [image, label] = provider.get(['image', 'label'])
-        # Preprocess the images.
-        image = (tf.to_float(image)/127.5) - 1.
-        # Creates a QueueRunner for the pre-fetching operation.
-        images, labels = tf.train.batch(
-            [image, label],
-            batch_size=batch_size,
-            num_threads=1,
-            capacity=100 * batch_size)
-            
-        labels = tf.reshape(labels, [-1])
-        if one_hot:
-            labels = tf.one_hot(labels, dataset.num_classes)
-        return images, labels, dataset.num_samples, dataset.num_classes, next_element, iterator
-        '''
         return next_batch, iterator
 
     def float_image_to_uint8(self, image):
