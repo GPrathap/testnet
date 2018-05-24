@@ -1,7 +1,6 @@
 from six.moves import cPickle
 import os
 import sys
-import tarfile
 import glob
 from six.moves import cPickle as pickle
 import numpy as np
@@ -61,8 +60,8 @@ class DataConvertor():
           data = cPickle.load(f, encoding='bytes')
       images = data['images']
       labels = data['labels']
-      images = np.array(images)
-      num_images = images.shape[0]
+      #images = np.array(images)
+      #num_images = images.shape[0]
       for X, y in zip(images,labels):
           # Feature contains a map of string to feature proto objects
           feature = {}
