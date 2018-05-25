@@ -8,10 +8,10 @@ acc = []
 nums = np.load('{}/features.npy'.format(FLAGS.feature_dir))
 
 for num in nums:
-    X_train = np.load('{}/features%d_train.npy'.format(FLAGS.feature_dir, num))
-    y_train = np.load('{}/label%d_train.npy'.format(FLAGS.feature_dir, num))
-    X_test = np.load('{}/features%d_test.npy'.format(FLAGS.feature_dir, num))
-    y_test = np.load('{}/label%d_test.npy'.format(FLAGS.feature_dir, num))
+    X_train = np.load('{}/features{}_train.npy'.format(FLAGS.feature_dir, num))
+    y_train = np.load('{}/label{}_train.npy'.format(FLAGS.feature_dir, num))
+    X_test = np.load('{}/features{}_test.npy'.format(FLAGS.feature_dir, num))
+    y_test = np.load('{}/label{}_test.npy'.format(FLAGS.feature_dir, num))
 
     print("Fitting the classifier to the training set")
     t0 = time()
