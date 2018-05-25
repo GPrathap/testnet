@@ -7,7 +7,7 @@ class Neotx():
         self.filters_discriminator = [1, 3, 5]
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
-        self.init_depth_of_generator = 256
+        self.init_depth_of_generator = 512
 
     def batch_normalization_layer(self, layer, is_training):
         gamma_init = tf.random_normal_initializer(1., 0.02)
@@ -16,11 +16,11 @@ class Neotx():
         return tf.nn.leaky_relu(layer, 0.2)
 
     def get_neoxt_conv2d_transpose_layer(self, current_layers, depth, filters, apply_batch_normalization
-                                         , is_train):
+                                         , is_train, stride=2):
         next_layers = []
         for filter_size, current_layer in zip(filters, current_layers):
             network = tf.layers.conv2d_transpose(current_layer, depth, [filter_size, filter_size]
-                                                 , strides=(2, 2)
+                                                 , strides=(stride, stride)
                                                  , padding='SAME', activation=None)
             if apply_batch_normalization:
                 network = self.batch_normalization_layer(network, is_train)
@@ -37,20 +37,20 @@ class Neotx():
             next_layers.append(network)
         return next_layers
 
-    def get_neoxt_conv2d_layer(self, current_layers, depth, filters, apply_batch_normalization, is_train):
+    def get_neoxt_conv2d_layer(self, current_layers, depth, filters, apply_batch_normalization, is_train, stride=2):
         next_layers = []
         for filter_size, current_layer in zip(filters, current_layers):
-            network = tf.layers.conv2d(current_layer, depth, [filter_size, filter_size], strides=(2, 2)
+            network = tf.layers.conv2d(current_layer, depth, [filter_size, filter_size], strides=(stride, stride)
                                        , padding='SAME',activation=None)
             if apply_batch_normalization:
                 network = self.batch_normalization_layer(network, is_train)
             next_layers.append(network)
         return next_layers
 
-    def get_neoxt_conv2d_first_layer(self, inputs, depth, filters, apply_batch_normalization, is_train):
+    def get_neoxt_conv2d_first_layer(self, inputs, depth, filters, apply_batch_normalization, is_train, stride=2):
         next_layers = []
         for filter_size in filters:
-            network = tf.layers.conv2d(inputs, depth, [filter_size, filter_size], strides=(2, 2)
+            network = tf.layers.conv2d(inputs, depth, [filter_size, filter_size], strides=(stride, stride)
                                        , padding='SAME',activation=None)
             if apply_batch_normalization:
                 network = self.batch_normalization_layer(network, is_train)
@@ -94,12 +94,12 @@ class Neotx():
             depth_of_h6 = int(depth_of_h5/2)
             h6_layers = self.get_neoxt_conv2d_transpose_layer(h5_layers, depth_of_h6
                                                               , self.filters_generator, True, is_train)
-            #depth_of_h7 = int(depth_of_h6 / 2)
-            #h7_layers = self.get_neoxt_conv2d_transpose_layer(h6_layers, depth_of_h7
-                                                             # , self.filters_generator, True, is_train)
+            depth_of_h7 = int(depth_of_h6 / 2)
+            h7_layers = self.get_neoxt_conv2d_transpose_layer(h6_layers, depth_of_h7
+                                                              , self.filters_generator, True, is_train, stride=1)
 
-            net_h8 = tf.layers.conv2d_transpose(h6_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME',
-                                                 activation=tf.identity)
+            net_h8 = tf.layers.conv2d_transpose(h7_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME'
+                                                , activation=tf.identity)
             '''
             net_h71 = tf.concat(axis=3, values=h6_layers)
             net_h72 = tf.layers.conv2d_transpose(net_h71, 6, [1, 1], strides=(1, 1), padding='SAME',
