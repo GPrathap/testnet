@@ -7,7 +7,7 @@ class Neotx():
         self.filters_discriminator = [1, 3, 5]
         self.filters_generator = [5]
         self.init_depth_of_discriminator = 16
-        self.init_depth_of_generator = 256
+        self.init_depth_of_generator = 512
 
     def batch_normalization_layer(self, layer, is_training):
         gamma_init = tf.random_normal_initializer(1., 0.02)
@@ -94,7 +94,11 @@ class Neotx():
             depth_of_h6 = int(depth_of_h5/2)
             h6_layers = self.get_neoxt_conv2d_transpose_layer(h5_layers, depth_of_h6
                                                               , self.filters_generator, True, is_train)
-            net_h7 = tf.layers.conv2d_transpose(h6_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME',
+            depth_of_h7 = int(depth_of_h6 / 2)
+            h7_layers = self.get_neoxt_conv2d_transpose_layer(h6_layers, depth_of_h7
+                                                              , self.filters_generator, True, is_train)
+
+            net_h8 = tf.layers.conv2d_transpose(h7_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME',
                                                  activation=tf.identity)
             '''
             net_h71 = tf.concat(axis=3, values=h6_layers)
@@ -103,9 +107,9 @@ class Neotx():
             net_h73 = tf.layers.conv2d_transpose(net_h72, 3, [1, 1], strides=(1, 1), padding='SAME',
                                                  activation=tf.identity)
             '''
-            logits = net_h7
-            net_h7 = tf.nn.tanh(net_h7)
-        return net_h7, logits
+            logits = net_h8
+            net_h8 = tf.nn.tanh(net_h8)
+        return net_h8, logits
 
 
     def discriminator(self, inputs, is_train=True, reuse=False):

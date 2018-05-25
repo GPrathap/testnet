@@ -21,7 +21,7 @@ def main(_):
 
     neoxt = Neotx()
     # z --> generator for training
-    net_d, d_logits, features = neoxt.discriminator(real_images, is_train=FLAGS.is_train,
+    net_d, d_logits, features = neoxt.discriminator(real_images, is_train=False,
                                                              reuse=False)
     data_convotor = DataConvertor(FLAGS.image_size, FLAGS.dataset_name,
                                   FLAGS.dataset_storage_location, FLAGS.c_dim)
