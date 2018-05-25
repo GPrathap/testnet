@@ -29,7 +29,7 @@ class Neotx():
 
     def get_neoxt_generator_reshape_layer(self, inputs, depth, filters, apply_batch_normalization, is_train):
         next_layers = []
-        for filter_size in filters:
+        for _ in filters:
             network = tf.layers.dense(inputs, depth, activation=tf.identity)
             network = tf.reshape(network, shape=(-1, 1, 1, depth))
             if apply_batch_normalization:
@@ -94,7 +94,7 @@ class Neotx():
             depth_of_h6 = int(depth_of_h5/2)
             h6_layers = self.get_neoxt_conv2d_transpose_layer(h5_layers, depth_of_h6
                                                               , self.filters_generator, True, is_train)
-            net_h7 = tf.layers.conv2d_transpose(h6_layers[0], 3, [3, 3], strides=(1, 1), padding='SAME',
+            net_h7 = tf.layers.conv2d_transpose(h6_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME',
                                                  activation=tf.identity)
             '''
             net_h71 = tf.concat(axis=3, values=h6_layers)
