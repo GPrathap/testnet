@@ -153,7 +153,7 @@ class DataConvertor():
     def provide_data(self, batch_size, split_name='train', one_hot=True):
 
         # Creates a dataset that reads all of the examples from filenames.
-        filenames = [ self.get_tfrecord_file_location(self.dataset_name, split_name)]
+        filenames = [self.get_tfrecord_file_location(self.dataset_name, split_name)]
         dataset = tf.data.TFRecordDataset(filenames)
 
         def _parse_function(example_proto):

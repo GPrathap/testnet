@@ -6,7 +6,7 @@ class Neotx():
     def __init__(self):
         self.filters_discriminator = [1, 3, 5]
         self.filters_generator = [5]
-        self.init_depth_of_discriminator = 4
+        self.init_depth_of_discriminator = 16
         self.init_depth_of_generator = 256
 
     def batch_normalization_layer(self, layer, is_training):
@@ -125,6 +125,7 @@ class Neotx():
             depth_of_h3 = depth_of_h2*2
             net_h3 = self.get_neoxt_conv2d_layer(net_h2, depth_of_h3, self.filters_discriminator, True
                                                  , is_train)
+            feature_set.append(tf.concat(self.get_neoxt_features(net_h3), axis=1))
 
             depth_of_h4 = depth_of_h3 * 2
             net_h4 = self.get_neoxt_conv2d_layer(net_h3, depth_of_h4, self.filters_discriminator, True
@@ -136,14 +137,9 @@ class Neotx():
                                                  , is_train)
             feature_set.append(tf.concat(self.get_neoxt_features(net_h5), axis=1))
 
-            depth_of_h6 = depth_of_h5 * 2
-            net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
-                                                 , is_train)
-            feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
-
             feature = tf.concat(feature_set, axis=1)
-            net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
-            logits = net_h7
-            net_h7 = tf.nn.sigmoid(net_h7)
+            net_h6 = tf.layers.dense(feature, 1, activation=tf.identity)
+            logits = net_h6
+            net_h6 = tf.nn.sigmoid(net_h6)
 
-        return net_h7, logits, feature
+        return net_h6, logits, feature
