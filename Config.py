@@ -20,6 +20,6 @@ flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
 flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training images data.')
 flags.DEFINE_string('dataset_path_test', '/data/images/uc_test_256/**.jpg', 'Location of testing images data.')
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')
-flags.DEFINE_string('dataset_name', 'nwpu_resisc45', 'Data set name')
-#flags.DEFINE_string('dataset_name', 'ucdataset', 'Data set name')
+#flags.DEFINE_string('dataset_name', 'nwpu_resisc45', 'Data set name')
+flags.DEFINE_string('dataset_name', 'ucdataset', 'Data set name')
 FLAGS = flags.FLAGS
