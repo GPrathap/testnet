@@ -98,15 +98,8 @@ class Neotx():
             h7_layers = self.get_neoxt_conv2d_transpose_layer(h6_layers, depth_of_h7
                                                               , self.filters_generator, True, is_train, stride=1)
 
-            net_h8 = tf.layers.conv2d_transpose(h7_layers[0], 1, [1, 1], strides=(1, 1), padding='SAME'
+            net_h8 = tf.layers.conv2d_transpose(h7_layers[0], 3, [1, 1], strides=(1, 1), padding='SAME'
                                                 , activation=tf.identity)
-            '''
-            net_h71 = tf.concat(axis=3, values=h6_layers)
-            net_h72 = tf.layers.conv2d_transpose(net_h71, 6, [1, 1], strides=(1, 1), padding='SAME',
-                                                 activation=tf.identity)
-            net_h73 = tf.layers.conv2d_transpose(net_h72, 3, [1, 1], strides=(1, 1), padding='SAME',
-                                                 activation=tf.identity)
-            '''
             logits = net_h8
             net_h8 = tf.nn.tanh(net_h8)
         return net_h8, logits

@@ -1,13 +1,13 @@
 from convert_to_tf_record import DataConvertor
 
 #dataset_path_train = "/data/nwpu_resisc45_train/**/**.jpg"
-#dataset_path_train = "/data/nwpu_resisc45_train/**/**.jpg"
-dataset_path_train = "/data/pattennet_train/**/**.jpg"
+dataset_path_train = "/data/nwpu_resisc45_train/**/**.jpg"
+#dataset_path_train = "/data/pattennet_train/**/**.jpg"
 #dataset_path_test = "/data/images/uc_test_256/**.jpg"
-#dataset_path_test = "/data/nwpu_resisc45_test/**/*.jpg"
-dataset_path_test = "/data/pattennet_test/**/*.jpg"
+dataset_path_test = "/data/nwpu_resisc45_test/**/*.jpg"
+#dataset_path_test = "/data/pattennet_test/**/*.jpg"
 dataset_storage_location = "/data/neotx"
-dataset_name = "pattennet"
+dataset_name = "nwpu_resisc45"
 image_size = 64
 batch_size = 64
 
