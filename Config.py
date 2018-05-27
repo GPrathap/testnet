@@ -16,11 +16,8 @@ flags.DEFINE_string("checkpoint_dir", "/data/checkpoint60", "Directory name to s
 flags.DEFINE_string("sample_dir", "/data/samples60", "Directory name to save the image samples [samples]")
 flags.DEFINE_string("feature_dir", "/data/features60", "Directory name to save features")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
-flags.DEFINE_string('dataset_dir', '/data/satellitegpu/', 'Location of data.')
-flags.DEFINE_string('dataset_path_train', '/data/images/uc_train_256_data/**.jpg', 'Location of training images data.')
-flags.DEFINE_string('dataset_path_test', '/data/images/uc_test_256/**.jpg', 'Location of testing images data.')
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')
-flags.DEFINE_string('dataset_name', 'pattennet', 'Data set name')
-#flags.DEFINE_string('dataset_name', 'nwpu_resisc45', 'Data set name')
+#flags.DEFINE_string('dataset_name', 'pattennet', 'Data set name')
+flags.DEFINE_string('dataset_name', 'nwpu_resisc45', 'Data set name')
 #flags.DEFINE_string('dataset_name', 'ucdataset', 'Data set name')
 FLAGS = flags.FLAGS

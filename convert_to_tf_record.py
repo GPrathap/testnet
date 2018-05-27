@@ -60,8 +60,8 @@ class DataConvertor():
           data = cPickle.load(f, encoding='bytes')
       images = data['images']
       labels = data['labels']
-      #images = np.array(images)
-      #num_images = images.shape[0]
+      images = np.array(images)
+
       for X, y in zip(images,labels):
           # Feature contains a map of string to feature proto objects
           feature = {}
