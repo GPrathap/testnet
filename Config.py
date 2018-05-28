@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 100, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 200, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "First momentum term of adam [0.5]")
 flags.DEFINE_float("beta2", 0.5, "Second momentum term of adam [0.5]")
