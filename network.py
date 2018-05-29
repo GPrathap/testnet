@@ -115,7 +115,7 @@ class Neotx():
         feature_set = []
         with tf.variable_scope("discriminator", reuse=reuse):
             net_h0 = self.get_neoxt_conv2d_first_layer(inputs, self.init_depth_of_discriminator
-                                                       , self.filters_discriminator, False, is_train)
+                                                       , self.filters_discriminator, True, is_train)
 
             depth_of_h1 = self.init_depth_of_discriminator*2
             net_h1 = self.get_neoxt_conv2d_layer(net_h0, depth_of_h1, self.filters_discriminator, True
