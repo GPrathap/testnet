@@ -134,10 +134,10 @@ class Neotx():
                                                  , is_train)
             feature_set.append(tf.concat(self.get_neoxt_features(net_h5), axis=1))
 
-            #depth_of_h6 = depth_of_h5 * 2
-            #net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
-            #                                     , is_train, stride=1)
-            #feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
+            depth_of_h6 = depth_of_h5 * 2
+            net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
+                                                 , is_train, stride=1)
+            feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
 
             feature = tf.concat(feature_set, axis=1)
             net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
