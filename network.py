@@ -8,11 +8,17 @@ class Neotx():
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
         self.init_depth_of_generator = 512
+        self._BATCH_NORM_DECAY = 0.997
+        self._BATCH_NORM_EPSILON = 1e-5
 
     def batch_normalization_layer(self, layer, is_training):
         gamma_init = tf.random_normal_initializer(1., 0.02)
-        layer = tf.layers.batch_normalization(layer, epsilon=1e-12, gamma_initializer=gamma_init,
-                                              training=is_training)
+        #layer = tf.layers.batch_normalization(layer, epsilon=1e-12, gamma_initializer=gamma_init,
+        #                                      training=is_training)
+
+        layer = tf.layers.batch_normalization( inputs=layer, momentum=self._BATCH_NORM_DECAY,
+                                       epsilon=self._BATCH_NORM_EPSILON, center=True, scale=True,
+                                       training=is_training)
         return tf.nn.leaky_relu(layer, 0.2)
 
     def get_neoxt_conv2d_transpose_layer(self, current_layers, depth, filters, apply_batch_normalization
@@ -69,7 +75,7 @@ class Neotx():
         with tf.variable_scope("generator", reuse=reuse):
 
             h1_layers = self.get_neoxt_generator_reshape_layer(inputs, self.init_depth_of_generator
-                                                               , self.filters_generator, True, is_train)
+                                                               , self.filters_generator, False, is_train)
 
             depth_of_h1 = int(self.init_depth_of_generator/2)
             h1_layers = self.get_neoxt_conv2d_transpose_layer(h1_layers, depth_of_h1
@@ -134,10 +140,10 @@ class Neotx():
                                                  , is_train)
             feature_set.append(tf.concat(self.get_neoxt_features(net_h5), axis=1))
 
-            depth_of_h6 = depth_of_h5 * 2
-            net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
-                                                 , is_train, stride=1)
-            feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
+            #depth_of_h6 = depth_of_h5 * 2
+            #net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
+            #                                     , is_train, stride=1)
+            #feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
 
             feature = tf.concat(feature_set, axis=1)
             net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
