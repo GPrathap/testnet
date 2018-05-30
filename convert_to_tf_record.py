@@ -165,13 +165,13 @@ class DataConvertor():
         def _parse_function(example_proto):
             keys_to_features = {'X': tf.FixedLenFeature(([self.image_size, self.image_size, self.channels])
                                                         , tf.float32),
-                                'y': tf.FixedLenFeature((), tf.int64, default_value=0),
-                                'image_id':tf.FixedLenFeature((), tf.string),
+                                'y': tf.FixedLenFeature((), tf.int64, default_value=0)
+                                #'image_id':tf.FixedLenFeature((), tf.string),
                                 }
 
             parsed_features = tf.parse_single_example(example_proto, keys_to_features)
 
-            return parsed_features['X'], parsed_features['y'], parsed_features['image_id']
+            return parsed_features['X'], parsed_features['y'] #, parsed_features['image_id']
 
         dataset = dataset.map(_parse_function)
         dataset = dataset.shuffle(buffer_size=10000)
