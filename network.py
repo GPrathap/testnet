@@ -147,8 +147,8 @@ class Neotx():
             #feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
 
             feature = tf.concat(feature_set, axis=1)
-            final_feature = tf.nn.dropout(feature, keep_prob=0.8)
-            net_h7 = tf.layers.dense(final_feature, 1, activation=tf.identity)
+            #final_feature = tf.nn.dropout(feature, keep_prob=0.8)
+            net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
             logits = net_h7
             net_h7 = tf.nn.sigmoid(net_h7)
 

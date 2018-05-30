@@ -60,13 +60,15 @@ class DataConvertor():
           data = cPickle.load(f, encoding='bytes')
       images = data['images']
       labels = data['labels']
+      image_ids = data["image_id"]
       images = np.array(images)
-
-      for X, y in zip(images,labels):
+      image_ids = np.array(image_ids)
+      for X, y, image_id in zip(images,labels, image_ids):
           # Feature contains a map of string to feature proto objects
           feature = {}
           feature['X'] = tf.train.Feature(float_list=tf.train.FloatList(value=X.flatten()))
           feature['y'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[y]))
+          feature['image_id'] = tf.train.Feature(int64_list=tf.train.St(value=[image_id]))
 
           # Construct the Example proto object
           example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -83,6 +85,7 @@ class DataConvertor():
       datalist = {}
       datalist["images"] = []
       datalist["labels"] = []
+      datalist["image_id"] = []
       for filename in glob.iglob(path, recursive=True):
         image = scipy.misc.imread(filename).astype(np.float)
         image = scipy.misc.imresize(image, [self.image_size, self.image_size])
@@ -96,6 +99,7 @@ class DataConvertor():
         else:
           datalist["images"].append(image)
           datalist["labels"].append(self.classes_list.index(currentClass))
+          datalist["image_id"].append(filename)
       return datalist
 
 
