@@ -25,7 +25,7 @@ for num in nums:
     difference = np.where((y_pred-y_train) !=0)
     hard_y_train = y_train[difference]
     hard_x_train = X_train[difference]
-    clf = clf.fit(hard_x_train, hard_y_train)
+    clf = clf.fit(X_train, y_train)
     print("Predicting...")
     t0 = time()
     y_pred = clf.predict(X_test)
