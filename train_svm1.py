@@ -1,6 +1,6 @@
 from time import time
 from sklearn.metrics import accuracy_score
-from sklearn import svm
+from sklearn import svm, linear_model
 import numpy as np
 from Config import *
 
@@ -16,7 +16,8 @@ for num in nums:
     print("Fitting the classifier to the training set")
     t0 = time()
     C = 1000.0
-    clf = svm.SVC(kernel='linear', C=C).fit(X_train, y_train)
+    #clf = svm.SVC(kernel='linear', C=C).fit(X_train, y_train)
+    clf = linear_model.SGDClassifier(warm_start=False, n_iter=5000).fit(X_train, y_train)
     print("done in %0.3fs" % (time() - t0))
 
     print("Predicting...")
