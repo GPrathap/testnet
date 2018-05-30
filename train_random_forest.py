@@ -28,5 +28,6 @@ for num in nums:
 
     print ("Accuracy: %.3f" % (accuracy_score(y_test, y_pred)))
     acc.append(accuracy_score(y_test, y_pred))
+
 print (acc)
 np.save('{}/accuracy_scores.npy'.format(FLAGS.feature_dir), acc)
