@@ -18,7 +18,7 @@ for num in nums:
     print("Fitting the classifier to the training set")
     t0 = time()
     C = 1000.0
-    clf = RandomForestClassifier(max_depth=2, random_state=0)
+    clf = RandomForestClassifier(n_estimators=1000, max_depth=1000, random_state=0)
     clf.fit(X_train, y_train)
     print("Done in %0.3fs" % (time() - t0))
 
