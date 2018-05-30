@@ -24,34 +24,6 @@ class DataConvertor():
         if not tf.gfile.Exists(self.dataset_storage_location):
             tf.gfile.MakeDirs(self.dataset_storage_location)
 
-    def _add_to_tfrecord(self, filename, tfrecord_writer, offset=0):
-      with tf.gfile.Open(filename, 'rb') as f:
-        if sys.version_info < (3,):
-          data = cPickle.load(f)
-        else:
-          data = cPickle.load(f, encoding='bytes')
-      images = data['images']
-      images = np.array(images)
-      num_images = images.shape[0]
-      images = images.reshape((num_images, self.channels, self.image_size, self.image_size))
-      labels = data['labels']
-      with tf.Graph().as_default():
-        image_placeholder = tf.placeholder(dtype=tf.uint8)
-        encoded_image = tf.image.encode_png(image_placeholder)
-        with tf.Session('') as sess:
-          for j in range(num_images):
-            sys.stdout.write('\r>> Reading file [%s] image %d/%d' % (
-                filename, offset + j + 1, offset + num_images))
-            sys.stdout.flush()
-            image = np.squeeze(images[j]).transpose((1, 2, 0))
-            label = labels[j]
-            png_string = sess.run(encoded_image,
-                                  feed_dict={image_placeholder: image})
-            example = dataset_utils.image_to_tfexample(
-                png_string, b'png', self.image_size, self.image_size, label)
-            tfrecord_writer.write(example.SerializeToString())
-      return offset + num_images
-
     def _add_to_tfrecord_new(self, filename, tfrecord_writer, offset=0):
       with tf.gfile.Open(filename, 'rb') as f:
         if sys.version_info < (3,):
@@ -68,7 +40,31 @@ class DataConvertor():
           feature = {}
           feature['X'] = tf.train.Feature(float_list=tf.train.FloatList(value=X.flatten()))
           feature['y'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[y]))
-          feature['image_id'] = tf.train.Feature(int64_list=tf.train.St(value=[image_id]))
+          feature['image_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(image_id)]))
+
+          # Construct the Example proto object
+          example = tf.train.Example(features=tf.train.Features(feature=feature))
+
+          # Serialize the example to a string
+          serialized = example.SerializeToString()
+
+          # write the serialized objec to the disk
+          tfrecord_writer.write(serialized)
+
+      #tfrecord_writer.close()
+
+    def _add_to_tfrecord_from_array(self, data, tfrecord_writer, offset=0):
+      images = data['images']
+      labels = data['labels']
+      image_ids = data["image_id"]
+      images = np.array(images)
+      image_ids = np.array(image_ids)
+      for X, y, image_id in zip(images,labels, image_ids):
+          # Feature contains a map of string to feature proto objects
+          feature = {}
+          feature['X'] = tf.train.Feature(float_list=tf.train.FloatList(value=X.flatten()))
+          feature['y'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[y]))
+          feature['image_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(image_id)]))
 
           # Construct the Example proto object
           example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -132,7 +128,7 @@ class DataConvertor():
         with tf.python_io.TFRecordWriter(training_filename) as tfrecord_writer:
           offset = 0
           filename = os.path.join(self.dataset_storage_location, self.dataset_name + "_train.pickle")
-          #offset = self._add_to_tfrecord(filename, tfrecord_writer, offset)
+
           offset = self._add_to_tfrecord_new(filename, tfrecord_writer, offset)
           labels_to_class_names = dict(zip(range(len(self.classes_list)), self.classes_list))
           self.write_label_file(labels_to_class_names)
@@ -145,6 +141,12 @@ class DataConvertor():
         labels_to_class_names = dict(zip(range(len(self.classes_list)), self.classes_list))
         self.write_label_file(labels_to_class_names)
         print('\nFinished converting the  dataset!')
+
+    def create_tfrecoad_from_array(self, data):
+        negative_data_filename = self._get_output_filename('negative')
+        with tf.python_io.TFRecordWriter(negative_data_filename) as tfrecord_writer:
+            self._add_to_tfrecord_from_array(data, tfrecord_writer)
+        print('\nFinished creating native hard mining dataset!')
 
     def write_label_file(self, labels_to_class_names):
         labels_filename = os.path.join(self.dataset_storage_location, self.dataset_name + "_labels.txt")
@@ -163,10 +165,13 @@ class DataConvertor():
         def _parse_function(example_proto):
             keys_to_features = {'X': tf.FixedLenFeature(([self.image_size, self.image_size, self.channels])
                                                         , tf.float32),
-                                'y': tf.FixedLenFeature((), tf.int64, default_value=0)}
+                                'y': tf.FixedLenFeature((), tf.int64, default_value=0),
+                                'image_id':tf.FixedLenFeature((), tf.string),
+                                }
+
             parsed_features = tf.parse_single_example(example_proto, keys_to_features)
 
-            return parsed_features['X'], parsed_features['y']
+            return parsed_features['X'], parsed_features['y'], parsed_features['image_id']
 
         dataset = dataset.map(_parse_function)
         dataset = dataset.shuffle(buffer_size=10000)

@@ -11,17 +11,19 @@ nums = np.load('{}/features.npy'.format(FLAGS.feature_dir))
 for num in nums:
     X_train = np.load('{}/features{}_train.npy'.format(FLAGS.feature_dir, num))
     y_train = np.load('{}/label{}_train.npy'.format(FLAGS.feature_dir, num))
-    feature_ids = '{}/feature_ids{}_train.npy'.format(FLAGS.feature_dir, num)
+
+    X_test = np.load('{}/features{}_test.npy'.format(FLAGS.feature_dir, num))
+    y_test = np.load('{}/label{}_test.npy'.format(FLAGS.feature_dir, num))
 
     print("Fitting the classifier to the training set")
     t0 = time()
     C = 1000.0
     clf = svm.SVC(kernel='linear', C=C).fit(X_train, y_train)
     print("done in %0.3fs" % (time() - t0))
-    y_pred = clf.predict(X_train)
+    y_pred = clf.predict(X_test)
     print("Predicting on training ...")
-    difference = np.where((y_train-y_pred) !=0)
-    corresponding_feature_ids = feature_ids[difference]
-    feature_ids_file = '{}/feature_ids{}_train_negative.npy'.format(FLAGS.feature_dir, num)
-    np.save(feature_ids_file, corresponding_feature_ids)
+    print("Accuracy: %.3f" % (accuracy_score(y_train, y_pred)))
 
+    acc.append(accuracy_score(y_test, y_pred))
+print (acc)
+np.save('{}/accuracy_scores.npy'.format(FLAGS.feature_dir), acc)

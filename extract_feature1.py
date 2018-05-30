@@ -50,15 +50,18 @@ def main(_):
                 os.makedirs(FLAGS.feature_dir)
             feature_vectors = []
             feature_labels = []
+            feature_ids = []
             print("Start processing on {} dataset".format(type))
             while True:
                 try:
                     next_batch_ = sess.run([next_batch])
                     batch_images = np.array(next_batch_[0][0], dtype=np.float32) / 127.5 - 1
                     batch_labels = np.array(next_batch_[0][1], dtype=np.int)
+                    #batch_ids = np.array(next_batch_[0][2], dtype=np.str)
                     feat = sess.run(features, feed_dict={real_images: batch_images})
                     feature_vectors.append(feat)
                     feature_labels.append(batch_labels)
+                    #feature_ids.append(batch_images)
 
                 except tf.errors.OutOfRangeError:
                     feature_vectors = np.array(feature_vectors)
@@ -66,10 +69,18 @@ def main(_):
 
                     feature_labels = np.array(feature_labels)
                     feature_labels = feature_labels.reshape(-1)
+
+                    feature_ids = np.array(feature_ids)
+                    feature_ids = feature_ids.reshape([-1, FLAGS.image_size, FLAGS.image_size, FLAGS.c_dim])
+
                     name_for_features = '{}/features{}_{}.npy'.format(FLAGS.feature_dir, num, type)
                     name_for_feature_labels = '{}/label{}_{}.npy'.format(FLAGS.feature_dir, num, type)
-                    np.save( name_for_features, feature_vectors)
+                    #name_for_feature_ids = '{}/feature_ids{}_{}.npy'.format(FLAGS.feature_dir, num, type)
+
+                    np.save(name_for_features, feature_vectors)
                     np.save(name_for_feature_labels, feature_labels)
+                    #np.save(name_for_feature_ids, feature_ids)
+
                     break
     np.save('{}/features.npy'.format(FLAGS.feature_dir), checkpoints_numbers)
 
