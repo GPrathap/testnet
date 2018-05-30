@@ -17,7 +17,7 @@ for num in nums:
     t0 = time()
     C = 1000.0
     #clf = svm.SVC(kernel='linear', C=C).fit(X_train, y_train)
-    clf = linear_model.SGDClassifier(warm_start=True, max_iter=6000).partial_fit(X_train, y_train)
+    clf = linear_model.SGDClassifier(warm_start=True, max_iter=6).partial_fit(X_train, y_train)
     print("done in %0.3fs" % (time() - t0))
 
     print("Hard mining")
