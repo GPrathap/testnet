@@ -19,23 +19,10 @@ for num in nums:
     C = 1000.0
     clf = svm.SVC(kernel='linear', C=C).fit(X_train, y_train)
     print("done in %0.3fs" % (time() - t0))
-    clf = pickle.dumps(clf)
-    print("Hard mining")
-    y_pred = clf.predict(X_train)
-    print("Predicting on training ...")
-    print("Accuracy: %.3f" % (accuracy_score(X_train, y_pred)))
-
-    difference = np.where((y_pred-y_train) !=0)
-    hard_y_train = y_train[difference]
-    hard_x_train = X_train[difference]
-
-    clf = clf.fit(hard_x_train, hard_y_train)
-
-    t0 = time()
-    print("Predicting on testing ...")
     y_pred = clf.predict(X_test)
+    print("Predicting on training ...")
+    print("Accuracy: %.3f" % (accuracy_score(y_train, y_pred)))
 
-    print ("Accuracy: %.3f" % (accuracy_score(y_test, y_pred)))
     acc.append(accuracy_score(y_test, y_pred))
 print (acc)
 np.save('{}/accuracy_scores.npy'.format(FLAGS.feature_dir), acc)
