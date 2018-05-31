@@ -8,17 +8,17 @@ from convert_to_tf_record import DataConvertor
 
 style_label_files_train = ["/data/brazilian_coffee_scenes/fold1.txt",
                      "/data/brazilian_coffee_scenes/fold2.txt",
-                     "/data/brazilian_coffee_scenes/fold3.txt"]
+                     "/data/brazilian_coffee_scenes/fold3.txt",
+                           "/data/brazilian_coffee_scenes/fold4.txt"]
 
-style_label_files_test = [ "/data/brazilian_coffee_scenes/fold4.txt",
+style_label_files_test = [
                      "/data/brazilian_coffee_scenes/fold5.txt"]
 
 paths_train = ["/data/brazilian_coffee_scenes/fold1/{}.jpg",
          "/data/brazilian_coffee_scenes/fold2/{}.jpg",
-         "/data/brazilian_coffee_scenes/fold3/{}.jpg"]
+         "/data/brazilian_coffee_scenes/fold3/{}.jpg", "/data/brazilian_coffee_scenes/fold4/{}.jpg"]
 
-paths_test = ["/data/brazilian_coffee_scenes/fold4/{}.jpg"
-         ,"/data/brazilian_coffee_scenes/fold5/{}.jpg"]
+paths_test = ["/data/brazilian_coffee_scenes/fold5/{}.jpg"]
 
 classes_list = ["noncoffee", "coffee"]
 
