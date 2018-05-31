@@ -32,15 +32,15 @@ class DataConvertor():
           data = cPickle.load(f, encoding='bytes')
       images = data['images']
       labels = data['labels']
-      image_ids = data["image_id"]
+      #image_ids = data["image_id"]
       images = np.array(images)
-      image_ids = np.array(image_ids)
-      for X, y, image_id in zip(images,labels, image_ids):
+      #image_ids = np.array(image_ids)
+      for X, y in zip(images,labels):
           # Feature contains a map of string to feature proto objects
           feature = {}
           feature['X'] = tf.train.Feature(float_list=tf.train.FloatList(value=X.flatten()))
           feature['y'] = tf.train.Feature(int64_list=tf.train.Int64List(value=[y]))
-          feature['image_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(image_id)]))
+          #feature['image_id'] = tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.compat.as_bytes(image_id)]))
 
           # Construct the Example proto object
           example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -121,6 +121,8 @@ class DataConvertor():
     def _get_output_filename(self, split_name):
       return '%s/%s_%s.tfrecord' % (self.dataset_storage_location, self.dataset_name, split_name)
 
+    def create_from_pickle(self, is_train):
+        self.run(is_train)
 
     def run(self, train=True):
       if train==True:
