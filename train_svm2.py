@@ -3,7 +3,6 @@ from sklearn.metrics import accuracy_score
 from sklearn import svm, linear_model
 import numpy as np
 from Config import *
-from six.moves import cPickle as pickle
 
 acc = []
 nums = np.load('{}/features.npy'.format(FLAGS.feature_dir))
@@ -22,8 +21,9 @@ for num in nums:
     print("done in %0.3fs" % (time() - t0))
     y_pred = clf.predict(X_test)
     print("Predicting on training ...")
-    print("Accuracy: %.3f" % (accuracy_score(y_train, y_pred)))
+    print("Accuracy: %.3f" % (accuracy_score(y_test, y_pred)))
 
     acc.append(accuracy_score(y_test, y_pred))
+
 print (acc)
 np.save('{}/accuracy_scores.npy'.format(FLAGS.feature_dir), acc)
