@@ -4,10 +4,10 @@ import tensorflow as tf
 
 class Neotx():
     def __init__(self):
-        self.filters_discriminator = [ 5]
+        self.filters_discriminator = [3, 5]
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
-        self.init_depth_of_generator = 256
+        self.init_depth_of_generator = 512
         self._BATCH_NORM_DECAY = 0.997
         self._BATCH_NORM_EPSILON = 1e-5
 
@@ -128,24 +128,17 @@ class Neotx():
             depth_of_h3 = depth_of_h2*2
             net_h3 = self.get_neoxt_conv2d_layer(net_h2, depth_of_h3, self.filters_discriminator, True
                                                  , is_train)
-            feature1 = tf.concat(self.get_neoxt_features(net_h3), axis=1)
-            #feature1 = tf.nn.dropout(feature1, keep_prob=0.85)
-            feature_set.append(feature1)
+            feature_set.append(tf.concat(self.get_neoxt_features(net_h3), axis=1))
 
             depth_of_h4 = depth_of_h3 * 2
             net_h4 = self.get_neoxt_conv2d_layer(net_h3, depth_of_h4, self.filters_discriminator, True
                                                  , is_train)
-
-            feature2 = tf.concat(self.get_neoxt_features(net_h4), axis=1)
-            #feature2 = tf.nn.dropout(feature2, keep_prob=0.85)
-            feature_set.append(feature2)
+            feature_set.append(tf.concat(self.get_neoxt_features(net_h4), axis=1))
 
             depth_of_h5 = depth_of_h4 * 2
             net_h5 = self.get_neoxt_conv2d_layer(net_h4, depth_of_h5, self.filters_discriminator, True
                                                  , is_train)
-            feature3 = tf.concat(self.get_neoxt_features(net_h5), axis=1)
-            #feature3 = tf.nn.dropout(feature3, keep_prob=0.85)
-            feature_set.append(feature3)
+            feature_set.append(tf.concat(self.get_neoxt_features(net_h5), axis=1))
 
             #depth_of_h6 = depth_of_h5 * 2
             #net_h6 = self.get_neoxt_conv2d_layer(net_h5, depth_of_h6, self.filters_discriminator, True
@@ -153,7 +146,6 @@ class Neotx():
             #feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
 
             feature = tf.concat(feature_set, axis=1)
-            feature = tf.nn.dropout(feature, keep_prob=0.85)
             net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
             logits = net_h7
             net_h7 = tf.nn.sigmoid(net_h7)
