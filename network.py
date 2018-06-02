@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class Neotx():
     def __init__(self):
-        self.filters_discriminator = [3, 5]
+        self.filters_discriminator = [1, 3, 5]
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
         self.init_depth_of_generator = 512
@@ -146,6 +146,7 @@ class Neotx():
             #feature_set.append(tf.concat(self.get_neoxt_features(net_h6), axis=1))
 
             feature = tf.concat(feature_set, axis=1)
+            feature = tf.nn.dropout(feature, keep_prob=0.85)
             net_h7 = tf.layers.dense(feature, 1, activation=tf.identity)
             logits = net_h7
             net_h7 = tf.nn.sigmoid(net_h7)
