@@ -7,7 +7,7 @@ class Neotx():
         self.filters_discriminator = [1, 3, 5]
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
-        self.init_depth_of_generator = 256
+        self.init_depth_of_generator = 512
         self._BATCH_NORM_DECAY = 0.997
         self._BATCH_NORM_EPSILON = 1e-5
 
