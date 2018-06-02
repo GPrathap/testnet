@@ -4,7 +4,7 @@ import tensorflow as tf
 
 class Neotx():
     def __init__(self):
-        self.filters_discriminator = [1, 3, 5]
+        self.filters_discriminator = [3, 5]
         self.filters_generator = [3]
         self.init_depth_of_discriminator = 16
         self.init_depth_of_generator = 512
