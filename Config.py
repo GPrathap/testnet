@@ -14,7 +14,7 @@ flags.DEFINE_integer("sample_step", 500, "The interval of generating sample. [50
 flags.DEFINE_integer("save_step", 50, "The interval of saving checkpoints. [500]")
 flags.DEFINE_string("checkpoint_dir", "/data/checkpoint102", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_string("sample_dir", "/data/samples102", "Directory name to save the image samples [samples]")
-flags.DEFINE_string("feature_dir", "/data/features102", "Directory name to save features")
+flags.DEFINE_string("feature_dir", "/home/runge/features102", "Directory name to save features")
 
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')

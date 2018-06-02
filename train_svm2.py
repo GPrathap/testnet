@@ -21,10 +21,10 @@ for num in nums:
     print("Fitting the classifier to the training set")
     t0 = time()
     C = 1000.0
-    n_estimators = 10
+    n_estimators = 14
 
     clf = OneVsRestClassifier(BaggingClassifier(svm.SVC(kernel='linear', C=C)
-                                                , max_samples=1.0 / n_estimators, n_estimators=n_estimators))
+                                                , max_samples=1.0 / n_estimators, n_estimators=n_estimators), n_jobs=7)
     clf = clf.fit(X_train, y_train)
     print("done in %0.3fs" % (time() - t0))
     y_pred = clf.predict(X_test)
