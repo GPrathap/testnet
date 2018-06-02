@@ -15,6 +15,7 @@ flags.DEFINE_integer("save_step", 50, "The interval of saving checkpoints. [500]
 flags.DEFINE_string("checkpoint_dir", "/data/checkpoint96", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_string("sample_dir", "/data/samples96", "Directory name to save the image samples [samples]")
 flags.DEFINE_string("feature_dir", "/data/features96", "Directory name to save features")
+
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
 flags.DEFINE_string('dataset_storage_location', '/data/neotx', 'Location of image store')
 #flags.DEFINE_string('dataset_name', 'pattennet', 'Data set name')
